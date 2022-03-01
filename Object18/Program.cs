@@ -13,6 +13,7 @@ builder.Services.AddDbContext<MainDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MyConn"));
 });
 #endregion
+
 RegisterServices(builder.Services);
 
 

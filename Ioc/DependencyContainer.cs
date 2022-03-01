@@ -2,8 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
+using Core.Modules.TestModule.Dtos;
+using Core.Modules.TestModule.Services;
+using Core.Repository;
 
 namespace Ioc
 {
@@ -11,13 +16,15 @@ namespace Ioc
     {
         public static void RegisterServices(IServiceCollection service)
         {
-            ////Application Layer
-            //service.AddScoped<ICourseService, CourseService>();
-            //service.AddScoped<IUserService, UserService>();
+            service.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            service.AddScoped<ITestService, TestService>();
 
-            ////Infra Data Layer
-            //service.AddScoped<ICourseRepository, CourseReository>();
-            //service.AddScoped<IUserRepository, UserRepository>();
+            #region AutoMapper Configs
+            service.AddAutoMapper(typeof(RoleAutoMapperProfile));
+
+
+
+            #endregion
         }
     }
 }
