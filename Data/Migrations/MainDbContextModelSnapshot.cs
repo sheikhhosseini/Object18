@@ -22,7 +22,7 @@ namespace Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("Domain.Models.Role", b =>
+            modelBuilder.Entity("Data.Models.Role", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -53,7 +53,7 @@ namespace Data.Migrations
                     b.ToTable("Roles");
                 });
 
-            modelBuilder.Entity("Domain.Models.User", b =>
+            modelBuilder.Entity("Data.Models.User", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -110,7 +110,7 @@ namespace Data.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Domain.Models.UserRole", b =>
+            modelBuilder.Entity("Data.Models.UserRole", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -142,15 +142,15 @@ namespace Data.Migrations
                     b.ToTable("UserRoles");
                 });
 
-            modelBuilder.Entity("Domain.Models.UserRole", b =>
+            modelBuilder.Entity("Data.Models.UserRole", b =>
                 {
-                    b.HasOne("Domain.Models.Role", "Role")
+                    b.HasOne("Data.Models.Role", "Role")
                         .WithMany("UserRoles")
                         .HasForeignKey("Role_Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Models.User", "User")
+                    b.HasOne("Data.Models.User", "User")
                         .WithMany("UserRoles")
                         .HasForeignKey("User_Id")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -161,12 +161,12 @@ namespace Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Models.Role", b =>
+            modelBuilder.Entity("Data.Models.Role", b =>
                 {
                     b.Navigation("UserRoles");
                 });
 
-            modelBuilder.Entity("Domain.Models.User", b =>
+            modelBuilder.Entity("Data.Models.User", b =>
                 {
                     b.Navigation("UserRoles");
                 });

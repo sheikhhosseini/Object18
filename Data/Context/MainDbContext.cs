@@ -1,4 +1,5 @@
-﻿using Domain.Models;
+﻿using System.Reflection;
+using Data.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Context;
@@ -22,19 +23,7 @@ public class MainDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        //modelBuilder.Entity<User>()
-        //    .HasQueryFilter(u => !u.IsDelete);
-        //var cascades = modelBuilder.Model.GetEntityTypes()
-        //    .SelectMany(t => t.GetForeignKeys())
-        //    .Where(fk => fk.IsOwnership && fk.DeleteBehavior == DeleteBehavior.Cascade);
-
-        //foreach (var fk in cascades)
-        //{
-        //    fk.DeleteBehavior = DeleteBehavior.Restrict;
-        //}
-        modelBuilder.ApplyConfiguration(new UserConfig());
-        modelBuilder.ApplyConfiguration(new RoleConfig());
-        modelBuilder.ApplyConfiguration(new UserRoleConfig());
+        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         base.OnModelCreating(modelBuilder);
     }

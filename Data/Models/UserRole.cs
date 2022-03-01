@@ -1,8 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Domain.Models;
-
+namespace Data.Models;
 public class UserRole : BaseModel
 {
     public long User_Id { get; set; }

@@ -1,8 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Domain.Models;
-
+namespace Data.Models;
 public class Role : BaseModel
 {
     public string RoleTitle { get; set; }

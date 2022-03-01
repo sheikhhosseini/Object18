@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Domain;
+namespace Data.Models;
 
 public class BaseModel
 {
@@ -11,10 +11,10 @@ public class BaseModel
     public DateTime LastUpdateDate { get; set; }
 }
 
-public class BaseModelConfig : IEntityTypeConfiguration<BaseModel>
-{
-    public void Configure(EntityTypeBuilder<BaseModel> builder)
-    {
-        builder.HasKey(b => b.Id);
-    }
-}
+//public class BaseModelConfig : IEntityTypeConfiguration<BaseModel>
+//{
+//    public void Configure(EntityTypeBuilder<BaseModel> builder)
+//    {
+//        builder.HasKey(b => b.Id);
+//    }
+//}
