@@ -55,5 +55,9 @@ public class UserConfig : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.UserImage)
             .HasMaxLength(200);
+
+        // index
+        builder.HasIndex(u=>u.Email)
+            .IsUnique();
     }
 }

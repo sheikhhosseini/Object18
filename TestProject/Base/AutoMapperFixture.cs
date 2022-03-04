@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Core.Modules.Account.Dtos;
 
-namespace TestProject;
+namespace TestProject.Base;
 
 public class AutoMapperFixture
 {

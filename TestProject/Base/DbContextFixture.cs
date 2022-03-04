@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Core.Repository;
 using Data.Context;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
-namespace TestProject;
+namespace TestProject.Base;
 
 public class DbContextFixture : IDisposable
 {
@@ -22,9 +17,7 @@ public class DbContextFixture : IDisposable
         var dbContextOptions = new DbContextOptionsBuilder<MainDbContext>()
             .UseSqlServer(ConnectionString)
             .Options;
-
         var dbContext = new MainDbContext(dbContextOptions);
-
         dbContext.Database.EnsureDeleted();
         dbContext.Database.EnsureCreated();
         dbContext.Dispose();
@@ -33,15 +26,12 @@ public class DbContextFixture : IDisposable
     public DbContextFixture()
     {
         SqlConnection = new SqlConnection(ConnectionString);
-
         SqlConnection.Open();
-
         var dbContextOptions = new DbContextOptionsBuilder<MainDbContext>()
             .UseSqlServer(SqlConnection)
             .Options;
 
         var dbContext = new MainDbContext(dbContextOptions);
-
         dbContext.Database.ExecuteSqlRaw(@"
                 EXEC sp_MSForEachTable 'ALTER TABLE ? NOCHECK CONSTRAINT ALL'
                 EXEC sp_MSForEachTable 'SET QUOTED_IDENTIFIER ON; DELETE FROM ?'
