@@ -2,7 +2,7 @@
 
 public class MyUniqCode
 {
-    public static string ActiveCode()
+    public static string GenerateActiveCode()
     {
         return Guid.NewGuid().ToString().Replace("-", "");
     }

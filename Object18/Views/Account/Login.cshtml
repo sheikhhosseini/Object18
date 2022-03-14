@@ -1,0 +1,47 @@
+﻿@*@model DataLayer.DTOs.Account.LoginDto
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<h1 class="text-center">فرم ورود به حساب کاربری</h1>
+
+<hr />
+<div class="row justify-content-center">
+    <div class="col-md-4">
+        <form asp-action="Login" asp-route-returnUrl="@ViewData["returnUrl"]">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <div class="form-check mb-3">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="RememberMe" /> @Html.DisplayNameFor(model => model.RememberMe)
+                </label>
+            </div>
+
+            <div class="mb-3">
+                <input type="submit" value="ورود" class="btn btn-success" />
+            </div>
+        </form>
+        <div>
+            <a asp-action="Register">ثبت نام</a>
+        </div>
+        <div>
+            <a asp-action="ForgotPassword">رمز عبور خود را فراموش کرده اید؟</a>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}*@

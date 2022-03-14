@@ -1,15 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Core.Modules.Account.Dtos;
+using Core.Modules.Account.ResultDtos;
 using Core.Modules.Account.Services;
 using Core.Repository;
+using Core.Shared.Email;
 using Data.Models;
 using FluentAssertions;
-using RandomDataGenerator.FieldOptions;
-using RandomDataGenerator.Randomizers;
 using TestProject.Base;
+using TestProject.Factory;
 using TestProject.MyRandomGenerator;
 using Xunit;
 
@@ -25,9 +27,9 @@ public class AccountTests : DbContextFixture
         _mapper = mapperFixture.Mapper;
     }
 
-    private IAccountService CreateService(GenericRepository<User> context)
+    private IAccountService CreateService(IGenericRepository<User> context)
     {
-        return new AccountService(context, _mapper);
+        return new AccountService(context, _mapper, null, null);
     }
 
     /// <summary>
@@ -50,7 +52,7 @@ public class AccountTests : DbContextFixture
         };
 
         // Act
-        await service.RegisterUser(createDto);
+        await service.RegisterUser(createDto, false);
 
         // Assert
         List<User> userList = dbContext.Set<User>().ToList();
@@ -68,5 +70,148 @@ public class AccountTests : DbContextFixture
         user.IsDelete.Should().BeFalse();
         user.UserImage.Should().Be("Default.jpg");
         user.MobileNumber.Should().BeNull();
+    }
+
+    /// <summary>
+    /// حساب کاربری کاربر باید با موفقیت فعال شود
+    /// اگر حساب غیر فعال باشد
+    /// و لینک فعالسازی معتبر باشد
+    /// </summary>
+    [Fact]
+    public async Task Active_User_Account_Success_Result()
+    {
+        // Arrange
+        User user = UserFactory.Create();
+
+        await using (var dbContext = CreateNewDbContext())
+        {
+            dbContext.Add(user);
+            await dbContext.SaveChangesAsync();
+        }
+
+        await using (var dbContext = CreateNewDbContext())
+        {
+            var repository = new GenericRepository<User>(dbContext);
+            var service = CreateService(repository);
+
+            string activeCode = user.ActiveCode;
+
+            // Act
+            var result = await service.ActiveAccount(activeCode);
+
+            // Assert
+            result.Should().Be(ActiveAccountResultDto.Success);
+
+            List<User> userList = dbContext.Set<User>().ToList();
+            userList.Should().HaveCount(1);
+            User updatedUser = userList.First();
+            updatedUser.Id.Should().BeGreaterThan(0);
+            updatedUser.FirstName.Should().Be(user.FirstName);
+            updatedUser.LastName.Should().Be(user.LastName);
+            updatedUser.Email.Should().Be(user.Email);
+            updatedUser.Password.Should().NotBeNullOrEmpty();
+            updatedUser.ActiveCode.Should().NotBeNullOrEmpty().And.NotBe(user.ActiveCode);
+            updatedUser.IsActive.Should().BeTrue();
+            updatedUser.CreateDate.Should().Be(user.CreateDate);
+            updatedUser.LastUpdateDate.Should().NotBe(user.LastUpdateDate);
+            updatedUser.IsDelete.Should().BeFalse();
+            updatedUser.UserImage.Should().Be("Default.jpg");
+            updatedUser.MobileNumber.Should().BeNull();
+        }
+    }
+
+    /// <summary>
+    /// حساب کاربری کاربر نباید فعال شود
+    /// اگر لینک فعالسازی نامعتبر باشد
+    /// </summary>
+    [Fact]
+    public async Task Active_User_Account_Failed_Result()
+    {
+        // Arrange
+        User user = UserFactory.Create();
+
+        await using (var dbContext = CreateNewDbContext())
+        {
+            dbContext.Add(user);
+            await dbContext.SaveChangesAsync();
+        }
+
+        await using (var dbContext = CreateNewDbContext())
+        {
+            var repository = new GenericRepository<User>(dbContext);
+            var service = CreateService(repository);
+
+            string activeCode = RandomFactory.Text(15);
+
+            // Act
+            var result = await service.ActiveAccount(activeCode);
+
+            // Assert
+            result.Should().Be(ActiveAccountResultDto.Failed);
+
+            List<User> userList = dbContext.Set<User>().ToList();
+            userList.Should().HaveCount(1);
+            User updatedUser = userList.First();
+            updatedUser.Id.Should().BeGreaterThan(0);
+            updatedUser.FirstName.Should().Be(user.FirstName);
+            updatedUser.LastName.Should().Be(user.LastName);
+            updatedUser.Email.Should().Be(user.Email);
+            updatedUser.Password.Should().NotBeNullOrEmpty();
+            updatedUser.ActiveCode.Should().NotBeNullOrEmpty().And.Be(user.ActiveCode);
+            updatedUser.IsActive.Should().Be(user.IsActive);
+            updatedUser.CreateDate.Should().Be(user.CreateDate);
+            updatedUser.LastUpdateDate.Should().Be(user.LastUpdateDate);
+            updatedUser.IsDelete.Should().BeFalse();
+            updatedUser.UserImage.Should().Be("Default.jpg");
+            updatedUser.MobileNumber.Should().BeNull();
+        }
+    }
+
+    /// <summary>
+    /// حساب کاربری کاربر نباید فعال شود
+    /// اگر قبلا فعال شده
+    /// </summary>
+    [Fact]
+    public async Task Active_User_Account_AlreadyActive_Result()
+    {
+        // Arrange
+        User user = UserFactory.Create();
+        user.IsActive = true;
+
+        await using (var dbContext = CreateNewDbContext())
+        {
+            dbContext.Add(user);
+            await dbContext.SaveChangesAsync();
+        }
+
+        await using (var dbContext = CreateNewDbContext())
+        {
+            var repository = new GenericRepository<User>(dbContext);
+            var service = CreateService(repository);
+
+            string activeCode = user.ActiveCode;
+
+            // Act
+            var result = await service.ActiveAccount(activeCode);
+
+            // Assert
+            result.Should().Be(ActiveAccountResultDto.AlreadyActive);
+
+            List<User> userList = dbContext.Set<User>().ToList();
+            userList.Should().HaveCount(1);
+            User updatedUser = userList.First();
+            updatedUser.Id.Should().BeGreaterThan(0);
+            updatedUser.FirstName.Should().Be(user.FirstName);
+            updatedUser.LastName.Should().Be(user.LastName);
+            updatedUser.Email.Should().Be(user.Email);
+            updatedUser.Password.Should().NotBeNullOrEmpty();
+            updatedUser.ActiveCode.Should().NotBeNullOrEmpty().And.Be(user.ActiveCode);
+            updatedUser.IsActive.Should().BeTrue();
+            updatedUser.CreateDate.Should().Be(user.CreateDate);
+            updatedUser.LastUpdateDate.Should().Be(user.LastUpdateDate);
+            updatedUser.IsDelete.Should().BeFalse();
+            updatedUser.UserImage.Should().Be("Default.jpg");
+            updatedUser.MobileNumber.Should().BeNull();
+        }
     }
 }

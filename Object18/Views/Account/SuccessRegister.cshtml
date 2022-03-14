@@ -1,0 +1,18 @@
+﻿@model Core.Modules.Account.Dtos.RegisterDto
+
+@{
+    ViewData["Title"] = "SuccessRegister";
+}
+
+@*<h1>Create</h1>*@
+
+<h4>وضعیت ثبت نام</h4>
+<hr />
+<div class="row">
+    <div class="col-sm-12">
+        <div class="alert alert-warning" role="alert">
+            <h3> کاربر عزیز @Model.FullName ثبت نام شما با موفقیت انجام شد</h3>
+            <p>جهت فعالسازی حساب کاربری خود به ایمیل فعالسازی که به آدرس @Model.Email ارسال شده است مراجعه کنید</p>
+        </div>
+    </div>
+</div>

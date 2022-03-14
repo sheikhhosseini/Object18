@@ -4,9 +4,9 @@ using Data.Models;
 
 namespace Core.Modules.Account.Dtos;
 
-public class AccountMapperProfile : Profile
+public class AccountProfile : Profile
 {
-    public AccountMapperProfile()
+    public AccountProfile()
     {
         // From Dto To Model
         CreateMap<RegisterDto, User>(MemberList.Destination)

@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Core.Modules.TestModule.Dtos;
 using Core.Modules.TestModule.Services;
 using Core.Repository;
+using Core.Shared.Email;
 
 namespace Ioc;
 
@@ -15,9 +16,14 @@ public class DependencyContainer
         service.AddScoped<ITestService, TestService>();
         service.AddScoped<IAccountService, AccountService>();
 
+        #region Email
+        service.AddScoped<IMailSender, SendEmail>();
+        service.AddScoped<IViewRenderService, RenderViewToString>();
+        #endregion
+
         #region AutoMapper Configs
         service.AddAutoMapper(typeof(RoleAutoMapperProfile));
-        service.AddAutoMapper(typeof(AccountMapperProfile));
+        service.AddAutoMapper(typeof(AccountProfile));
         #endregion
     }
 }

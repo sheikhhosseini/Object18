@@ -1,0 +1,38 @@
+﻿@using Core.Modules.Account.ResultDtos
+@model ActiveAccountResultDto
+
+@{
+    ViewData["Title"] = "Active Account";
+}
+
+
+<h4>فعال سازی حساب کاربری</h4>
+<hr />
+<div class="row">
+    <div class="col-sm-12">
+        @switch (Model)
+        {
+            case ActiveAccountResultDto.Success:
+                <div class="alert alert-success" role="alert">
+                    <h3>حساب کاربری شما با موفقیت فعال شد . میتوانید از لینک زیر وارد حساب خود شوید</h3>
+                    <a asp-action="Login">ورود به سایت</a>
+                </div>
+                break;
+
+            case ActiveAccountResultDto.AlreadyActive:
+                <div class="alert alert-warning" role="alert">
+                    <h3>حساب کاربری شما فعال است نیازی به فعال سازی مجدد نیست</h3>
+                    <a asp-action="Login">ورود به سایت</a>
+                </div>
+                break;
+
+            case ActiveAccountResultDto.Failed:
+                <div class="alert alert-danger" role="alert">
+                    <h3>لینک مورد استفاده معتبر نمی باشد</h3>
+                    <a asp-action="Register">ثبت نام</a>
+                </div>
+                break;
+
+        }
+    </div>
+</div>
