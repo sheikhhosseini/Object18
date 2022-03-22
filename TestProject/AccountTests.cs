@@ -8,6 +8,7 @@ using Core.Modules.Account.ResultDtos;
 using Core.Modules.Account.Services;
 using Core.Repository;
 using Core.Shared.Email;
+using Data.Context;
 using Data.Models;
 using FluentAssertions;
 using TestProject.Base;
@@ -27,7 +28,7 @@ public class AccountTests : DbContextFixture
         _mapper = mapperFixture.Mapper;
     }
 
-    private IAccountService CreateService(IGenericRepository<User> context)
+    private IAccountService CreateService(MainDbContext context)
     {
         return new AccountService(context, _mapper, null, null);
     }
@@ -40,8 +41,8 @@ public class AccountTests : DbContextFixture
     {
         // Arrange
         await using var dbContext = CreateNewDbContext();
-        var repository = new GenericRepository<User>(dbContext);
-        var service = CreateService(repository);
+        //var repository = new GenericRepository<User>(dbContext);
+        var service = CreateService(dbContext);
 
         var createDto = new RegisterDto
         {
@@ -91,8 +92,8 @@ public class AccountTests : DbContextFixture
 
         await using (var dbContext = CreateNewDbContext())
         {
-            var repository = new GenericRepository<User>(dbContext);
-            var service = CreateService(repository);
+            //var repository = new GenericRepository<User>(dbContext);
+            var service = CreateService(dbContext);
 
             string activeCode = user.ActiveCode;
 
@@ -138,8 +139,8 @@ public class AccountTests : DbContextFixture
 
         await using (var dbContext = CreateNewDbContext())
         {
-            var repository = new GenericRepository<User>(dbContext);
-            var service = CreateService(repository);
+            //var repository = new GenericRepository<User>(dbContext);
+            var service = CreateService(dbContext);
 
             string activeCode = RandomFactory.Text(15);
 
@@ -186,8 +187,8 @@ public class AccountTests : DbContextFixture
 
         await using (var dbContext = CreateNewDbContext())
         {
-            var repository = new GenericRepository<User>(dbContext);
-            var service = CreateService(repository);
+            //var repository = new GenericRepository<User>(dbContext);
+            var service = CreateService(dbContext);
 
             string activeCode = user.ActiveCode;
 

@@ -4,6 +4,7 @@ using Core.Modules.Account.ResultDtos;
 using Core.Repository;
 using Core.Shared.Email;
 using Core.Shared.Tools;
+using Data.Context;
 using Data.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,14 +12,15 @@ namespace Core.Modules.Account.Services;
 
 public class AccountService : IAccountService
 {
-    private readonly IGenericRepository<User> _userRepository;
+    private readonly MainDbContext _dbContext;
+    //private readonly IGenericRepository<User> _userRepository;
     private readonly IMapper _mapper;
     private readonly IMailSender _mailSender;
     private readonly IViewRenderService _renderViewService;
 
-    public AccountService(IGenericRepository<User> userRepository, IMapper mapper, IMailSender mailSender, IViewRenderService renderViewService)
+    public AccountService(MainDbContext dbContext, IMapper mapper, IMailSender mailSender, IViewRenderService renderViewService)
     {
-        _userRepository = userRepository;
+        _dbContext = dbContext;
         _mapper = mapper;
         _mailSender = mailSender;
         _renderViewService = renderViewService;
@@ -31,8 +33,10 @@ public class AccountService : IAccountService
         newUser.UserImage = "Default.jpg";
         newUser.Password.EncodePasswordMd5();
 
-        await _userRepository.AddEntity(newUser);
-        await _userRepository.SaveChangesAsync();
+        await _dbContext.AddEntity(newUser);
+        await _dbContext.SaveChangesAsync();
+        //await _userRepository.AddEntity(newUser);
+        //await _userRepository.SaveChangesAsync();
 
         #region Send Email
         if (sendEmail)
@@ -47,13 +51,13 @@ public class AccountService : IAccountService
 
     public async Task<bool> IsUserExist(string email)
     {
-        return await _userRepository.GetEntitiesQuery()
+        return await _dbContext.GetEntitiesQuery<User>()
             .AnyAsync(u => u.Email == email);
     }
 
     public async Task<ActiveAccountResultDto> ActiveAccount(string activeCode)
     {
-        var user = await _userRepository.GetEntitiesQuery()
+        var user = await _dbContext.GetEntitiesQuery<User>()
             .SingleOrDefaultAsync(u => u.ActiveCode == activeCode);
 
         if (user != null)
@@ -63,7 +67,7 @@ public class AccountService : IAccountService
                 user.IsActive = true;
                 user.ActiveCode = MyUniqCode.GenerateActiveCode();
                 user.LastUpdateDate = DateTime.Now;
-                await _userRepository.SaveChangesAsync();
+                await _dbContext.SaveChangesAsync();
                 return ActiveAccountResultDto.Success;
             }
             return ActiveAccountResultDto.AlreadyActive;

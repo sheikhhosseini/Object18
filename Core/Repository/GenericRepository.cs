@@ -4,6 +4,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Core.Repository;
 
+
+public class x
+{
+    public int Id { get; set; }
+}
+
 public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity :BaseModel
 {
     private readonly MainDbContext _context;
@@ -72,5 +78,45 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
     public void Dispose()
     {
         _context?.Dispose();
+    }
+}
+
+public static class DbContextExtension
+{
+    public static IQueryable<TEntity> GetEntitiesQuery<TEntity>(this MainDbContext dbContext) where TEntity : BaseModel
+    {
+        return dbContext.Set<TEntity>().AsQueryable();
+    }
+
+    public static async Task<TEntity> GetEntityById<TEntity>(this MainDbContext dbContext , long entityId) where TEntity : BaseModel
+    {
+        return await dbContext.Set<TEntity>().SingleOrDefaultAsync(e => e.Id == entityId);
+    }
+
+    public static async Task AddEntity<TEntity>(this MainDbContext dbContext, TEntity entity) where TEntity : BaseModel
+    {
+        entity.CreateDate = DateTime.Now;
+        entity.LastUpdateDate = entity.CreateDate;
+        await dbContext.Set<TEntity>().AddAsync(entity);
+    }
+
+    public static void UpdateEntity<TEntity>(this MainDbContext dbContext, TEntity entity) where TEntity : BaseModel
+    {
+        entity.LastUpdateDate = DateTime.Now;
+        dbContext.Set<TEntity>().Update(entity);
+    }
+
+    public static void SoftRemoveEntity<TEntity>(this MainDbContext dbContext, TEntity entity) where TEntity : BaseModel
+    {
+        entity.IsDelete = true;
+        dbContext.Set<TEntity>().Update(entity);
+    }
+
+    public static async Task SoftRemoveEntityById<TEntity>(this MainDbContext dbContext, long entityId) where TEntity : BaseModel
+    {
+        var dbSet = dbContext.Set<TEntity>();
+        var entity = await dbSet.SingleAsync(e => e.Id == entityId);
+        entity.IsDelete = true;
+        dbSet.Update(entity);
     }
 }
