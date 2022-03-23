@@ -1,3 +1,4 @@
+#nullable enable
 namespace Object18.Models
 {
     public class ErrorViewModel

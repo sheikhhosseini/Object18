@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Core.Modules.Account.Dtos;
 using Core.Modules.Account.ResultDtos;
-using Core.Repository;
 using Core.Shared.Email;
 using Core.Shared.Tools;
 using Data.Context;
@@ -13,7 +12,6 @@ namespace Core.Modules.Account.Services;
 public class AccountService : IAccountService
 {
     private readonly MainDbContext _dbContext;
-    //private readonly IGenericRepository<User> _userRepository;
     private readonly IMapper _mapper;
     private readonly IMailSender _mailSender;
     private readonly IViewRenderService _renderViewService;
@@ -35,8 +33,6 @@ public class AccountService : IAccountService
 
         await _dbContext.AddEntity(newUser);
         await _dbContext.SaveChangesAsync();
-        //await _userRepository.AddEntity(newUser);
-        //await _userRepository.SaveChangesAsync();
 
         #region Send Email
         if (sendEmail)
@@ -51,13 +47,13 @@ public class AccountService : IAccountService
 
     public async Task<bool> IsUserExist(string email)
     {
-        return await _dbContext.GetEntitiesQuery<User>()
+        return await _dbContext.Set<User>()
             .AnyAsync(u => u.Email == email);
     }
 
     public async Task<ActiveAccountResultDto> ActiveAccount(string activeCode)
     {
-        var user = await _dbContext.GetEntitiesQuery<User>()
+        var user = await _dbContext.Set<User>()
             .SingleOrDefaultAsync(u => u.ActiveCode == activeCode);
 
         if (user != null)
@@ -74,6 +70,4 @@ public class AccountService : IAccountService
         }
         return ActiveAccountResultDto.Failed;
     }
-
-    
 }

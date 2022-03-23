@@ -1,13 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Core.Modules.Account.Dtos;
 using Core.Modules.Account.ResultDtos;
 using Core.Modules.Account.Services;
-using Core.Repository;
-using Core.Shared.Email;
 using Data.Context;
 using Data.Models;
 using FluentAssertions;
