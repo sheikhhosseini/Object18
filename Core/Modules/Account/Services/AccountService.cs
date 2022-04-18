@@ -1,11 +1,14 @@
-﻿using AutoMapper;
+﻿using System.Reflection;
+using AutoMapper;
 using Core.Modules.Account.Dtos;
 using Core.Modules.Account.ResultDtos;
 using Core.Shared.Email;
 using Core.Shared.Tools;
 using Data.Context;
 using Data.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Nito.AsyncEx;
 
 namespace Core.Modules.Account.Services;
 
@@ -31,7 +34,7 @@ public class AccountService : IAccountService
         newUser.UserImage = "Default.jpg";
         newUser.Password.EncodePasswordMd5();
 
-        await _dbContext.AddEntity(newUser);
+        await _dbContext.AddEntityWithLogAsync(newUser,true);
         await _dbContext.SaveChangesAsync();
 
         #region Send Email
@@ -62,7 +65,7 @@ public class AccountService : IAccountService
             {
                 user.IsActive = true;
                 user.ActiveCode = MyUniqCode.GenerateActiveCode();
-                user.LastUpdateDate = DateTime.Now;
+                await _dbContext.UpdateEntityWithLogAsync(user, true);
                 await _dbContext.SaveChangesAsync();
                 return ActiveAccountResultDto.Success;
             }
