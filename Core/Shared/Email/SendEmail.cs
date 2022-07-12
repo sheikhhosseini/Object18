@@ -20,7 +20,10 @@ public class SendEmail : IMailSender
         // mail.Attachments.Add(attachment);
 
         SmtpServer.Port = 587;
-        SmtpServer.Credentials = new System.Net.NetworkCredential(defaultEmail, "test123456s");
+        // بر اسا آخرین آپدیت گوگل بر اساس قابلیت 
+        // app paswords 
+        // این پسورد مخصوص استفاده در این سیستم است
+        SmtpServer.Credentials = new System.Net.NetworkCredential(defaultEmail, "qcxwgexoiqosbent");
         SmtpServer.EnableSsl = true;
 
 
