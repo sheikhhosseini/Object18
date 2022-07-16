@@ -1,5 +1,5 @@
-﻿@using Core.Modules.Account.ResultDtos
-@model ActiveAccountResultDto
+﻿@using Core.Modules.Account.Results
+@model ActiveAccountResult
 
 @{
     ViewData["Title"] = "Active Account";
@@ -12,21 +12,21 @@
     <div class="col-sm-12">
         @switch (Model)
         {
-            case ActiveAccountResultDto.Success:
+            case ActiveAccountResult.Success:
                 <div class="alert alert-success" role="alert">
                     <h3>حساب کاربری شما با موفقیت فعال شد . میتوانید از لینک زیر وارد حساب خود شوید</h3>
                     <a asp-action="Login">ورود به سایت</a>
                 </div>
                 break;
 
-            case ActiveAccountResultDto.AlreadyActive:
+            case ActiveAccountResult.AlreadyActive:
                 <div class="alert alert-warning" role="alert">
                     <h3>حساب کاربری شما فعال است نیازی به فعال سازی مجدد نیست</h3>
                     <a asp-action="Login">ورود به سایت</a>
                 </div>
                 break;
 
-            case ActiveAccountResultDto.Failed:
+            case ActiveAccountResult.Failed:
                 <div class="alert alert-danger" role="alert">
                     <h3>لینک مورد استفاده معتبر نمی باشد</h3>
                     <a asp-action="Register">ثبت نام</a>

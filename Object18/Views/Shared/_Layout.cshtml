@@ -28,11 +28,13 @@
                         @if (User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="UserPanel" asp-action="Index">خوش امدید @User.Identity.Name</a>
+                                <a class="nav-link text-dark" asp-area="Admin" asp-controller="Home" asp-action="Index">خوش امدید @User.Identity.Name</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">خروج</a>
-                            </li>
+                            <form asp-controller="Account" asp-action="Logout">
+                                <li class="nav-item">
+                                    <button type="submit" class="nav-link text-dark" >خروج</button>
+                                </li>
+                            </form>
                         }
                         else
                         {

@@ -1,4 +1,5 @@
-﻿@*@model DataLayer.DTOs.Account.LoginDto
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Core.Modules.Account.Dtos.LoginDto
 
 @{
     ViewData["Title"] = "Login";
@@ -44,4 +45,4 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}*@
+}

@@ -1,14 +1,11 @@
-﻿using System.Reflection;
-using AutoMapper;
+﻿using AutoMapper;
 using Core.Modules.Account.Dtos;
-using Core.Modules.Account.ResultDtos;
+using Core.Modules.Account.Results;
 using Core.Shared.Email;
 using Core.Shared.Tools;
 using Data.Context;
 using Data.Models;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Nito.AsyncEx;
 
 namespace Core.Modules.Account.Services;
 
@@ -34,7 +31,7 @@ public class AccountService : IAccountService
         newUser.UserImage = "Default.jpg";
         newUser.Password.EncodePasswordMd5();
 
-        await _dbContext.AddEntityWithLogAsync(newUser,true);
+        await _dbContext.AddEntityWithLogAsync(newUser, false);
         await _dbContext.SaveChangesAsync();
 
         #region Send Email
@@ -54,7 +51,7 @@ public class AccountService : IAccountService
             .AnyAsync(u => u.Email == email);
     }
 
-    public async Task<ActiveAccountResultDto> ActiveAccount(string activeCode)
+    public async Task<ActiveAccountResult> ActiveAccount(string activeCode)
     {
         var user = await _dbContext.Set<User>()
             .SingleOrDefaultAsync(u => u.ActiveCode == activeCode);
@@ -67,10 +64,25 @@ public class AccountService : IAccountService
                 user.ActiveCode = MyUniqCode.GenerateActiveCode();
                 await _dbContext.UpdateEntityWithLogAsync(user, true);
                 await _dbContext.SaveChangesAsync();
-                return ActiveAccountResultDto.Success;
+                return ActiveAccountResult.Success;
             }
-            return ActiveAccountResultDto.AlreadyActive;
+            return ActiveAccountResult.AlreadyActive;
         }
-        return ActiveAccountResultDto.Failed;
+        return ActiveAccountResult.Failed;
+    }
+
+    public async Task<LoginResult> LoginUser(LoginDto loginDto)
+    {
+        var user = await _dbContext.Set<User>().SingleOrDefaultAsync(
+            u => u.Email == loginDto.Email
+            && u.Password == loginDto.Password.EncodePasswordMd5());
+
+        if (user is null)
+            return new LoginResult { Status = LoginStatus.Failed, User = null };
+
+        if (!user.IsActive)
+            return new LoginResult { Status = LoginStatus.NotActivated, User = user };
+
+        return new LoginResult { Status = LoginStatus.Success, User = user };
     }
 }

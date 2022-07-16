@@ -28,7 +28,6 @@ builder.Services.AddAuthentication(options =>
     options.LogoutPath = "/Logout";
     options.AccessDeniedPath = "/AccessDenied";
     options.ExpireTimeSpan = TimeSpan.FromDays(60);
-
 });
 #endregion
 

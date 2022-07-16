@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Core.Modules.Account.Dtos;
-using Core.Modules.Account.ResultDtos;
+using Core.Modules.Account.Results;
 using Core.Modules.Account.Services;
 using Data.Context;
 using Data.Models;
@@ -98,7 +98,7 @@ public class AccountTests : DbContextFixture
             var result = await service.ActiveAccount(activeCode);
 
             // Assert
-            result.Should().Be(ActiveAccountResultDto.Success);
+            result.Should().Be(ActiveAccountResult.Success);
 
             List<User> userList = dbContext.Set<User>().ToList();
             userList.Should().HaveCount(1);
@@ -145,7 +145,7 @@ public class AccountTests : DbContextFixture
             var result = await service.ActiveAccount(activeCode);
 
             // Assert
-            result.Should().Be(ActiveAccountResultDto.Failed);
+            result.Should().Be(ActiveAccountResult.Failed);
 
             List<User> userList = dbContext.Set<User>().ToList();
             userList.Should().HaveCount(1);
@@ -193,7 +193,7 @@ public class AccountTests : DbContextFixture
             var result = await service.ActiveAccount(activeCode);
 
             // Assert
-            result.Should().Be(ActiveAccountResultDto.AlreadyActive);
+            result.Should().Be(ActiveAccountResult.AlreadyActive);
 
             List<User> userList = dbContext.Set<User>().ToList();
             userList.Should().HaveCount(1);
