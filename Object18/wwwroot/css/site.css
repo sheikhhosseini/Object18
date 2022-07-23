@@ -1,8 +1,17 @@
-html {
-  font-size: 14px;
+@font-face {
+    font-family: myfont;
+    src: url(../fonts/W_kamran_p30download.com.ttf)
 }
 
-@media (min-width: 768px) {
+* {
+    font-family: myfont;
+}
+
+/*html {
+  font-size: 14px;
+}*/
+
+/*@media (min-width: 768px) {
   html {
     font-size: 16px;
   }
@@ -15,4 +24,4 @@ html {
 
 body {
   margin-bottom: 60px;
-}
+}*/
