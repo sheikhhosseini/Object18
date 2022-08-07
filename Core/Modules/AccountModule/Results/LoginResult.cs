@@ -1,6 +1,6 @@
 ﻿using Data.Models;
 
-namespace Core.Modules.Account.Results;
+namespace Core.Modules.AccountModule.Results;
 
 public class LoginResult
 {

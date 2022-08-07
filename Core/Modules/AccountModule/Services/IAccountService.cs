@@ -1,7 +1,7 @@
-﻿using Core.Modules.Account.Dtos;
-using Core.Modules.Account.Results;
+﻿using Core.Modules.AccountModule.Dtos;
+using Core.Modules.AccountModule.Results;
 
-namespace Core.Modules.Account.Services;
+namespace Core.Modules.AccountModule.Services;
 
 public interface IAccountService
 {

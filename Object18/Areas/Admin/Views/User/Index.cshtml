@@ -1,0 +1,120 @@
+﻿@using Core.Modules.UserModule.Dtos;
+@{
+    ViewData["Title"] = "کاربران";
+}
+@model List<UserDataTableDto>
+
+<script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.js"></script>
+
+<div class="page-heading">
+    <div class="page-title">
+        <div class="row">
+            <div class="col-12 col-md-6 order-md-1 order-last">
+                <h3>کاربران</h3>
+                <p class="text-subtitle text-muted">خوش آمدید</p>
+            </div>
+            <div class="col-12 col-md-6 order-md-2 order-first">
+            </div>
+        </div>
+    </div>
+    <section class="section">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">لیست کاربران</h4>
+                <form>
+                    <div class="mb-3 row">
+                        <div class="col-sm-2">
+                            <label class="form-label">نام</label>
+                            <input name="firstName" type="text" class="form-control">
+                        </div>
+                        <div class="col-sm-2">
+                            <label class="form-label">ایمیل</label>
+                            <input name="email" type="text" class="form-control">
+                        </div>
+                        <div class="col-sm-2">
+                            <label class="form-label">تلفن</label>
+                            <input name="mobileNumber" type="text" class="form-control">
+                        </div>
+                        @*<div class="col-sm-2">
+                            <label asp-for="Filters.SortOrder" class="form-label">مرتب سازی نام</label>
+                            <select asp-for="Filters.SortOrder" class="form-control">
+                                <option>انتخاب کنید</option>
+                                <option value="asc">صعودی</option>
+                                <option value="desc">نزولی</option>
+                            </select>
+                        </div>*@
+                        @*<div class="col-sm-1">
+                            <label asp-for="TakeEntity" class="form-label">تعداد</label>
+                            <select asp-for="TakeEntity" class="form-control">
+                                <option value="2">2</option>
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                            </select>
+                        </div>*@
+                        @*<div class="col-sm-1 position-relative">
+                            <a asp-area="Admin" asp-controller="User" asp-action="Index" asp class="btn btn-success position-absolute bottom-0">رفرش</a>
+                        </div>*@
+                        <div class="col-sm-2 position-relative">
+                            <button type="button" onclick="Submit()" class="btn btn-primary position-absolute bottom-0">جست و جو</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="card-body">
+                <div id="myGrid" style="height: 200px;" class="ag-theme-balham-dark"></div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        fetchData();
+    });
+
+    function fetchData() {
+        var formData = JSON.stringify( $('form').serializeArray() );
+
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            url: 'https://@Context.Request.Host/Admin/User/GridAjax',
+            contentType: "application/json",
+            data: formData,
+            success: function(result) {
+                gridOptions.api.setRowData(result);
+            }
+        });
+    }
+
+
+    function Submit() {
+        fetchData();
+    }
+
+    const columnDefs = [
+        {
+            field: "firstName"
+
+        },
+        { field: "lastName" },
+        { field: "mobileNumber" },
+        { field: "email" }
+    ];
+
+
+    const gridOptions = {
+        defaultColDef: {
+            resizable: true
+        },
+        columnDefs: columnDefs,
+        enableRtl: true
+        //onCellClicked: params => {
+        //    console.log('cell was clicked', params);
+        //}
+    };
+
+    const eGridDiv = document.getElementById("myGrid");
+    new agGrid.Grid(eGridDiv, gridOptions);
+    
+</script>

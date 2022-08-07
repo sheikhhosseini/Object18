@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Core.Modules.Account.Dtos;
+using Core.Modules.AccountModule.Dtos;
 
 namespace TestProject.Base;
 

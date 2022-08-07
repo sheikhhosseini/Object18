@@ -1,5 +1,6 @@
-﻿using Core.Modules.Account.Dtos;
-using Core.Modules.Account.Services;
+﻿using Core.Modules.AccountModule.Dtos;
+using Core.Modules.AccountModule.Services;
+using Core.Modules.UserModule.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Core.Shared.Email;
 
@@ -10,6 +11,7 @@ public class DependencyContainer
     public static void RegisterServices(IServiceCollection service)
     {
         service.AddScoped<IAccountService, AccountService>();
+        service.AddScoped<IUserService, UserService>();
 
         #region Email
         service.AddScoped<IMailSender, SendEmail>();

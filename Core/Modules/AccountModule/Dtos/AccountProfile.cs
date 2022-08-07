@@ -2,7 +2,7 @@
 using Core.Shared.Tools;
 using Data.Models;
 
-namespace Core.Modules.Account.Dtos;
+namespace Core.Modules.AccountModule.Dtos;
 
 public class AccountProfile : Profile
 {

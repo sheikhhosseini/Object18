@@ -9,7 +9,16 @@ public class MainDbContext : DbContext
 {
     public MainDbContext(DbContextOptions<MainDbContext> options) : base(options)
     {
+        
+    }
 
+    public IQueryable<TEntity> GetEntitiesQuery<TEntity>() where TEntity : BaseModel
+    {
+        return Set<TEntity>().AsQueryable();
+    }
+    public IQueryable<TEntity> GetEntitiesAsNoTrackingQuery<TEntity>() where TEntity : BaseModel
+    {
+        return Set<TEntity>().AsNoTracking().AsQueryable();
     }
 
     public IQueryable<TEntity> GetEntityQueryById<TEntity>(long entityId) where TEntity : BaseModel
@@ -22,7 +31,7 @@ public class MainDbContext : DbContext
         return Set<TEntity>().AsNoTracking().Where(e => e.Id == entityId);
     }
 
-    public async Task AddEntityWithLogAsync<TEntity>(TEntity entity, bool log) where TEntity : BaseModel
+    public async Task AddEntityAsync<TEntity>(TEntity entity, bool log = false) where TEntity : BaseModel
     {
         entity.CreateDate = DateTime.Now;
         entity.LastUpdateDate = entity.CreateDate;
@@ -40,7 +49,25 @@ public class MainDbContext : DbContext
         }
     }
 
-    public async Task UpdateEntityWithLogAsync<TEntity>(TEntity entity, bool log) where TEntity : BaseModel
+    public async Task UpdateEntityAsync<TEntity>(TEntity entity, bool log = false) where TEntity : BaseModel
+    {
+        entity.LastUpdateDate = DateTime.Now;
+        if (log)
+        {
+            string oldValues = JsonConvert.SerializeObject(GetEntityQueryByIdAsNoTracking<TEntity>(entity.Id).FirstOrDefault());
+            string newValues = JsonConvert.SerializeObject(entity);
+            await AddAsync(new LogCenter
+            {
+                EntityName = entity.GetType().Name,
+                Action = entity.IsDelete ? LogType.SoftDelete : LogType.Update,
+                CreateDate = entity.LastUpdateDate,
+                EntityOldValues = oldValues,
+                EntityNewValues = newValues
+            });
+        }
+    }
+
+    public async Task UpdateEntityAsNoTrackingAsync<TEntity>(TEntity entity, bool log = false) where TEntity : BaseModel
     {
         entity.LastUpdateDate = DateTime.Now;
         Update(entity);
@@ -62,7 +89,7 @@ public class MainDbContext : DbContext
     public async Task SoftRemoveEntityWithLogAsync<TEntity>(TEntity entity, bool log) where TEntity : BaseModel
     {
         entity.IsDelete = true;
-        await UpdateEntityWithLogAsync(entity, log);
+        await UpdateEntityAsync(entity, log);
     }
 
     public async Task SoftRemoveEntityByIdWithLogAsync<TEntity>(long entityId, bool log) where TEntity : BaseModel
@@ -101,7 +128,7 @@ public class MainDbContext : DbContext
 
     #endregion
 
-    #region ManageCascade-OnModelCreateing
+    #region OnModelCreating
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

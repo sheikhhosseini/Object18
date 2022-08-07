@@ -1,4 +1,4 @@
-﻿namespace Core.Modules.Account.Results;
+﻿namespace Core.Modules.AccountModule.Results;
 
 public enum ActiveAccountResult
 {

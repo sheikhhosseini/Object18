@@ -1,13 +1,13 @@
 ﻿using AutoMapper;
-using Core.Modules.Account.Dtos;
-using Core.Modules.Account.Results;
+using Core.Modules.AccountModule.Dtos;
+using Core.Modules.AccountModule.Results;
 using Core.Shared.Email;
 using Core.Shared.Tools;
 using Data.Context;
 using Data.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Core.Modules.Account.Services;
+namespace Core.Modules.AccountModule.Services;
 
 public class AccountService : IAccountService
 {
@@ -31,7 +31,7 @@ public class AccountService : IAccountService
         newUser.UserImage = "Default.jpg";
         newUser.Password.EncodePasswordMd5();
 
-        await _dbContext.AddEntityWithLogAsync(newUser, false);
+        await _dbContext.AddEntityAsync(newUser, false);
         await _dbContext.SaveChangesAsync();
 
         #region Send Email
@@ -62,7 +62,7 @@ public class AccountService : IAccountService
             {
                 user.IsActive = true;
                 user.ActiveCode = MyUniqCode.GenerateActiveCode();
-                await _dbContext.UpdateEntityWithLogAsync(user, true);
+                await _dbContext.UpdateEntityAsync(user, true);
                 await _dbContext.SaveChangesAsync();
                 return ActiveAccountResult.Success;
             }

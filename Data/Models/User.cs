@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Data.Models;
+
 public class User : BaseModel
 {
     public string FirstName { get; set; }
