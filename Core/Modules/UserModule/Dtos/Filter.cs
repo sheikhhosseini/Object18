@@ -1,4 +1,6 @@
-﻿namespace Core.Modules.UserModule.Dtos;
+﻿using Core.Shared.Paging;
+
+namespace Core.Modules.UserModule.Dtos;
 
 public class Filter
 {
@@ -7,7 +9,7 @@ public class Filter
     public string Value { get; set; }
 }
 
-public class Rule
+public class Rule : BasePaging
 {
     public List<Filter> Filters { get; set; }
 

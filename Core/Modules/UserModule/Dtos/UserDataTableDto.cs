@@ -8,8 +8,6 @@ public class MyDataTable<T> : BasePaging
 {
     public List<T> Records { get; set; }
 
-    public Filters Filters { get; set; } = new();
-
     public MyDataTable<T> SetPaging(BasePaging paging)
     {
         this.PageId = paging.PageId;
@@ -29,13 +27,6 @@ public class MyDataTable<T> : BasePaging
     }
 }
 
-public class Filters
-{
-    public string FirstName { get; set; }
-    public string Email { get; set; }
-    public string MobileNumber { get; set; }
-    public string SortOrder { get; set; }
-}
 
 public class UserDataTableDto
 {
@@ -48,7 +39,7 @@ public class UserDataTableDto
     public string MobileNumber { get; set; }
 
     public string Email { get; set; }
-    
+
     public bool IsActive { get; set; }
 }
 

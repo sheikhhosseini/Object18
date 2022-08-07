@@ -16,10 +16,9 @@ public class UserController : Controller
     }
 
     // GET: UserController
-    public async Task<ActionResult> Index()
+    public ActionResult Index()
     {
-        var result = await _userService.GetDataTable(null);
-        return View(result);
+        return View();
     }
 
     [HttpPost]

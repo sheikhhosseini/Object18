@@ -1,8 +1,6 @@
-﻿@using Core.Modules.UserModule.Dtos;
-@{
+﻿@{
     ViewData["Title"] = "کاربران";
 }
-@model List<UserDataTableDto>
 
 <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.js"></script>
 
@@ -36,15 +34,15 @@
                             <input name="mobileNumber" type="text" class="form-control">
                         </div>
                         @*<div class="col-sm-1">
-                            <label asp-for="TakeEntity" class="form-label">تعداد</label>
-                            <select asp-for="TakeEntity" class="form-control">
-                                <option value="2">2</option>
-                                <option value="5">5</option>
-                                <option value="10">10</option>
-                            </select>
+                        <label asp-for="TakeEntity" class="form-label">تعداد</label>
+                        <select asp-for="TakeEntity" class="form-control">
+                        <option value="2">2</option>
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        </select>
                         </div>*@
                         @*<div class="col-sm-1 position-relative">
-                            <a asp-area="Admin" asp-controller="User" asp-action="Index" asp class="btn btn-success position-absolute bottom-0">رفرش</a>
+                        <a asp-area="Admin" asp-controller="User" asp-action="Index" asp class="btn btn-success position-absolute bottom-0">رفرش</a>
                         </div>*@
                         <div class="col-sm-2 position-relative">
                             <button type="button" onclick="Submit()" class="btn btn-primary position-absolute bottom-0">جست و جو</button>
@@ -62,58 +60,149 @@
             <div class="card-body">
                 <div id="myGrid" style="height: 200px;" class="ag-theme-balham-dark"></div>
             </div>
+            <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                    <li id="previous" class="page-item" onclick="onPreviousClick()">
+                        <button class="page-link" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </button>
+                    </li>
+
+                    <li id="next" class="page-item">
+                        <button class="page-link" aria-label="Next" onclick="onNextClick()">
+                            <span aria-hidden="true">&raquo;</span>
+                        </button>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </section>
 </div>
 
-<script type="text/javascript">
-    $(document).ready(function() {
-        fetchData();
-    });
+@section Scripts {
+    <script type="text/javascript">
+        var activePage = 1;
 
-    function fetchData() {
-        //var formData = JSON.stringify( $('form').serializeArray() );
-        var x = { filters: $('form').serializeArray(), sortOrder: $('select[name="sortOrder"]').val() };
-        $.ajax({
-            type: "POST",
-            dataType: "json",
-            url: 'https://@Context.Request.Host/Admin/User/GridAjax',
-            contentType: "application/json",
-            data: JSON.stringify(x),
-            success: function(result) {
-                gridOptions.api.setRowData(result);
-            }
+        $(document).ready(function() {
+            var data = { filters: $('form').serializeArray(), sortOrder: $('select[name="sortOrder"]').val() };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: 'https://@Context.Request.Host/Admin/User/GridAjax',
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: function(result) {
+                    gridOptions.api.setRowData(result.records);
+
+                    // generate pagination
+                    var pagination = '';
+                    for (var i = result.startPage; i <= result.endPage; i++) {
+                        if (i === result.activePage) {
+                            pagination += '<li class="page-item pages active"><button class="page-link">' + i + '</button></li>';
+                        } else {
+                            pagination += '<li class="page-item pages"><button class="page-link">' + i + '</button></li>';
+                        }
+                    }
+                    $('#previous').after(pagination);
+                }
+            });
         });
-    }
 
 
-    function Submit() {
-        fetchData();
-    }
+        function onNextClick() {
+            var data = {
+                filters: $('form').serializeArray(), sortOrder: $('select[name="sortOrder"]').val()
+                , pageId: activePage + 1
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: 'https://@Context.Request.Host/Admin/User/GridAjax',
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: function(result) {
+                    gridOptions.api.setRowData(result.records);
+                    activePage = result.activePage;
 
-    const columnDefs = [
-        {
-            field: "firstName"
+                    $('.pages').remove();
+                    var pagination = '';
+                    for (var i = result.startPage; i <= result.endPage; i++) {
+                        if (i === result.activePage) {
+                            pagination += '<li class="page-item pages active"><button class="page-link">' + i + '</button></li>';
+                        } else {
+                            pagination += '<li class="page-item pages"><button class="page-link">' + i + '</button></li>';
+                        }
+                    }
+                    $('#previous').after(pagination);
+                }
+            });
+        }
 
-        },
-        { field: "lastName" },
-        { field: "mobileNumber" },
-        { field: "email" }
-    ];
+        function onPreviousClick() {
+            var data = {
+                filters: $('form').serializeArray(), sortOrder: $('select[name="sortOrder"]').val()
+                , pageId: activePage - 1
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: 'https://@Context.Request.Host/Admin/User/GridAjax',
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: function(result) {
+                    gridOptions.api.setRowData(result.records);
+                    activePage = result.activePage;
+
+                    $('.pages').remove();
+                    var pagination = '';
+                    for (var i = result.startPage; i <= result.endPage; i++) {
+                        if (i === result.activePage) {
+                            pagination += '<li class="page-item pages active"><button class="page-link">' + i + '</button></li>';
+                        } else {
+                            pagination += '<li class="page-item pages"><button class="page-link">' + i + '</button></li>';
+                        }
+                    }
+                    $('#previous').after(pagination);
+                }
+            });
+        }
 
 
-    const gridOptions = {
-        defaultColDef: {
-            resizable: true
-        },
-        columnDefs: columnDefs,
-        enableRtl: true
-        //onCellClicked: params => {
-        //    console.log('cell was clicked', params);
-        //}
-    };
 
-    const eGridDiv = document.getElementById("myGrid");
-    new agGrid.Grid(eGridDiv, gridOptions);
-    
-</script>
+        
+        function Submit() {
+            var data = { filters: $('form').serializeArray(), sortOrder: $('select[name="sortOrder"]').val() };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: 'https://@Context.Request.Host/Admin/User/GridAjax',
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: function(result) {
+                    gridOptions.api.setRowData(result.records);
+                }
+            });
+        }
+
+        const columnDefs = [
+            { field: "firstName" },
+            { field: "lastName" },
+            { field: "mobileNumber" },
+            { field: "email" }
+        ];
+
+        const gridOptions = {
+            defaultColDef: {
+                resizable: true
+            },
+            columnDefs: columnDefs,
+            enableRtl: true
+        };
+
+        const eGridDiv = document.getElementById("myGrid");
+        new agGrid.Grid(eGridDiv, gridOptions);
+
+
+    </script>
+}
+

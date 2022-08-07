@@ -19,13 +19,13 @@ public class UserService : IUserService
         _mapper = mapper;
     }
 
-    public async Task<List<UserDataTableDto>> GetDataTable(Rule data)
+    public async Task<MyDataTable<UserDataTableDto>> GetDataTable(Rule data)
     {
         var query = _dbContext.GetEntitiesAsNoTrackingQuery<User>();
-            
+
         if (data is not null)
         {
-            if (data.Filters.Count > 0)
+            if (data.Filters?.Count > 0)
             {
                 foreach (var filter in data.Filters)
                 {
@@ -35,14 +35,30 @@ public class UserService : IUserService
                     }
                 }
             }
-            
+
             query = query.ApplyOrdering($"createDate {data.SortOrder}");
         }
 
 
-        var result = await query.ToListAsync();
 
-        return _mapper.Map<List<UserDataTableDto>>(result);
+
+        var pageCount = (int)Math.Ceiling(query.Count() / (double)data.TakeEntity);
+        var pager = PageGenerator.Generate(pageCount, data.PageId, data.TakeEntity);
+        var users = await query.Paging(pager).ToListAsync();
+
+        var result = new MyDataTable<UserDataTableDto>
+        {
+            Records = _mapper.Map<List<UserDataTableDto>>(users),
+            PageId = pager.PageId,
+            PageCount = pager.PageCount,
+            StartPage = pager.StartPage,
+            EndPage = pager.EndPage,
+            TakeEntity = pager.TakeEntity,
+            SkipEntity = pager.SkipEntity,
+            ActivePage = pager.ActivePage,
+        };
+
+        return result;
     }
 
     public async Task<UserUpdateDto> Create(UserCreateDto createDto)

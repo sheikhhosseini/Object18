@@ -4,7 +4,7 @@ namespace Core.Modules.UserModule.Services;
 
 public interface IUserService
 {
-    Task<List<UserDataTableDto>> GetDataTable(Rule data);
+    Task<MyDataTable<UserDataTableDto>> GetDataTable(Rule data);
 
     Task<UserUpdateDto> Create(UserCreateDto createDto);
     
