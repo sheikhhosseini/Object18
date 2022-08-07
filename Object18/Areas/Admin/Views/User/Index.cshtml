@@ -35,14 +35,6 @@
                             <label class="form-label">تلفن</label>
                             <input name="mobileNumber" type="text" class="form-control">
                         </div>
-                        @*<div class="col-sm-2">
-                            <label asp-for="Filters.SortOrder" class="form-label">مرتب سازی نام</label>
-                            <select asp-for="Filters.SortOrder" class="form-control">
-                                <option>انتخاب کنید</option>
-                                <option value="asc">صعودی</option>
-                                <option value="desc">نزولی</option>
-                            </select>
-                        </div>*@
                         @*<div class="col-sm-1">
                             <label asp-for="TakeEntity" class="form-label">تعداد</label>
                             <select asp-for="TakeEntity" class="form-control">
@@ -59,6 +51,13 @@
                         </div>
                     </div>
                 </form>
+                <div class="col-sm-2">
+                    <label class="form-label">مرتب سازی اخرین رکورد</label>
+                    <select name="sortOrder" class="form-control">
+                        <option value="asc">صعودی</option>
+                        <option value="desc">نزولی</option>
+                    </select>
+                </div>
             </div>
             <div class="card-body">
                 <div id="myGrid" style="height: 200px;" class="ag-theme-balham-dark"></div>
@@ -73,14 +72,14 @@
     });
 
     function fetchData() {
-        var formData = JSON.stringify( $('form').serializeArray() );
-
+        //var formData = JSON.stringify( $('form').serializeArray() );
+        var x = { filters: $('form').serializeArray(), sortOrder: $('select[name="sortOrder"]').val() };
         $.ajax({
             type: "POST",
             dataType: "json",
             url: 'https://@Context.Request.Host/Admin/User/GridAjax',
             contentType: "application/json",
-            data: formData,
+            data: JSON.stringify(x),
             success: function(result) {
                 gridOptions.api.setRowData(result);
             }

@@ -6,3 +6,10 @@ public class Filter
 
     public string Value { get; set; }
 }
+
+public class Rule
+{
+    public List<Filter> Filters { get; set; }
+
+    public string SortOrder { get; set; } = "asc";
+}

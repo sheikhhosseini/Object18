@@ -19,20 +19,26 @@ public class UserService : IUserService
         _mapper = mapper;
     }
 
-    public async Task<List<UserDataTableDto>> GetDataTable(List<Filter> data)
+    public async Task<List<UserDataTableDto>> GetDataTable(Rule data)
     {
         var query = _dbContext.GetEntitiesAsNoTrackingQuery<User>();
             
-        if (data is not null && data.Count > 0)
+        if (data is not null)
         {
-            foreach (var filter in data)
+            if (data.Filters.Count > 0)
             {
-                if (!string.IsNullOrEmpty(filter.Value))
+                foreach (var filter in data.Filters)
                 {
-                    query = query.ApplyFiltering($"{filter.Name} =* {filter.Value}");
+                    if (!string.IsNullOrEmpty(filter.Value))
+                    {
+                        query = query.ApplyFiltering($"{filter.Name} =* {filter.Value}");
+                    }
                 }
             }
+            
+            query = query.ApplyOrdering($"createDate {data.SortOrder}");
         }
+
 
         var result = await query.ToListAsync();
 

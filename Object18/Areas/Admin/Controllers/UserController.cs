@@ -23,7 +23,7 @@ public class UserController : Controller
     }
 
     [HttpPost]
-    public async Task<ActionResult> GridAjax([FromBody] List<Filter> data)
+    public async Task<ActionResult> GridAjax([FromBody] Rule data)
     {
         var result = await _userService.GetDataTable(data);
         return new JsonResult(result);
