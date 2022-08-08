@@ -196,6 +196,20 @@
                     gridOptions.api.setRowData(result.records);
                     activePage = result.activePage;
 
+                    if (result.activePage === 1) {
+                        $('#previous').addClass('disabled');
+                    }
+                    else {
+                        $('#previous').removeClass('disabled');
+                    }
+
+                    if (result.activePage === result.endPage) {
+                        $('#next').addClass('disabled');
+                    }
+                    else {
+                        $('#next').removeClass('disabled');
+                    }
+
                     $('.pages').remove();
                     var pagination = '';
                     for (var i = result.startPage; i <= result.endPage; i++) {
