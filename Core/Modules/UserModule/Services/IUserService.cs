@@ -1,10 +1,11 @@
 ﻿using Core.Modules.UserModule.Dtos;
+using Core.Shared.Paging;
 
 namespace Core.Modules.UserModule.Services;
 
 public interface IUserService
 {
-    Task<MyDataTable<UserDataTableDto>> GetDataTable(Rule data);
+    Task<AdvanceDataTable<UserDataTableDto>> GetDataTable(AdvanceDataTable<UserDataTableDto> data);
 
     Task<UserUpdateDto> Create(UserCreateDto createDto);
     

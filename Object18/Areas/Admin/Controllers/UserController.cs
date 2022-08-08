@@ -1,6 +1,6 @@
 ﻿using Core.Modules.UserModule.Dtos;
 using Core.Modules.UserModule.Services;
-using Microsoft.AspNetCore.Http;
+using Core.Shared.Paging;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Object18.Areas.Admin.Controllers;
@@ -22,7 +22,7 @@ public class UserController : Controller
     }
 
     [HttpPost]
-    public async Task<ActionResult> GridAjax([FromBody] Rule data)
+    public async Task<ActionResult> GridAjax([FromBody] AdvanceDataTable<UserDataTableDto> data)
     {
         var result = await _userService.GetDataTable(data);
         return new JsonResult(result);

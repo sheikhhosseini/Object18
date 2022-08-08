@@ -1,32 +1,7 @@
 ﻿using AutoMapper;
-using Core.Shared.Paging;
 using Data.Models;
 
 namespace Core.Modules.UserModule.Dtos;
-
-public class MyDataTable<T> : BasePaging
-{
-    public List<T> Records { get; set; }
-
-    public MyDataTable<T> SetPaging(BasePaging paging)
-    {
-        this.PageId = paging.PageId;
-        this.PageCount = paging.PageCount;
-        this.StartPage = paging.StartPage;
-        this.EndPage = paging.EndPage;
-        this.TakeEntity = paging.TakeEntity;
-        this.SkipEntity = paging.SkipEntity;
-        this.ActivePage = paging.ActivePage;
-        return this;
-    }
-
-    public MyDataTable<T> SetList(List<T> records)
-    {
-        this.Records = records;
-        return this;
-    }
-}
-
 
 public class UserDataTableDto
 {

@@ -9,7 +9,7 @@ public class MainDbContext : DbContext
 {
     public MainDbContext(DbContextOptions<MainDbContext> options) : base(options)
     {
-        
+
     }
 
     public IQueryable<TEntity> GetEntitiesQuery<TEntity>() where TEntity : BaseModel
@@ -117,7 +117,7 @@ public class MainDbContext : DbContext
     public async Task HardRemoveEntityByIdWithLogAsync<TEntity>(long entityId, bool log) where TEntity : BaseModel
     {
         var entity = await GetEntityQueryById<TEntity>(entityId).SingleAsync();
-        await HardRemoveEntityWithLogAsync(entity , log);
+        await HardRemoveEntityWithLogAsync(entity, log);
     }
 
     #region Tables

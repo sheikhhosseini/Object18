@@ -19,54 +19,22 @@ public class UserService : IUserService
         _mapper = mapper;
     }
 
-    public async Task<MyDataTable<UserDataTableDto>> GetDataTable(Rule data)
+    public async Task<AdvanceDataTable<UserDataTableDto>> GetDataTable(
+        AdvanceDataTable<UserDataTableDto> data
+    )
     {
         var query = _dbContext.GetEntitiesAsNoTrackingQuery<User>();
 
-        if (data is not null)
+        foreach (var filter in data.Filters)
         {
-            if (data.Filters?.Count > 0)
+            if (!string.IsNullOrEmpty(filter.Value))
             {
-                foreach (var filter in data.Filters)
-                {
-                    if (!string.IsNullOrEmpty(filter.Value))
-                    {
-                        query = query.ApplyFiltering($"{filter.Name} =* {filter.Value}");
-                    }
-                }
+                query = query.ApplyFiltering($"{filter.Name} =* {filter.Value}");
             }
-
-            query = query.ApplyOrdering($"createDate {data.SortOrder}");
         }
+        query = query.ApplyOrdering($"createDate {data.SortOrder}");
 
-
-
-
-        var pageCount = (int)Math.Ceiling(query.Count() / (double)data.TakeEntity);
-        var pager = PageGenerator.Generate(pageCount, data.PageId, data.TakeEntity);
-        var users = await query.Paging(pager).ToListAsync();
-
-        var records = _mapper.Map<List<UserDataTableDto>>(users);
-
-        var rowNumber = pager.SkipEntity;
-        foreach (var record in records)
-        {
-            record.Row = ++rowNumber;
-        }
-
-        var result = new MyDataTable<UserDataTableDto>
-        {
-            Records = records,
-            PageId = pager.PageId,
-            PageCount = pager.PageCount,
-            StartPage = pager.StartPage,
-            EndPage = pager.EndPage,
-            TakeEntity = pager.TakeEntity,
-            SkipEntity = pager.SkipEntity,
-            ActivePage = pager.ActivePage,
-        };
-
-        return result;
+        return await GeneratePages(data, query);
     }
 
     public async Task<UserUpdateDto> Create(UserCreateDto createDto)
@@ -102,5 +70,38 @@ public class UserService : IUserService
     public async Task<UserUpdateDto> Delete(List<UserDeleteDto> deleteDtos)
     {
         throw new NotImplementedException();
+    }
+
+    private async Task<AdvanceDataTable<UserDataTableDto>> GeneratePages(
+        AdvanceDataTable<UserDataTableDto> data,
+        IQueryable<User> query
+    )
+    {
+
+        var pageCount = (int)Math.Ceiling(query.Count() / (double)data.TakeEntity);
+        var pager = PageGenerator.Generate(pageCount, data.PageId, data.TakeEntity);
+        var users = await query.Paging(pager).ToListAsync();
+
+        var records = _mapper.Map<List<UserDataTableDto>>(users);
+
+        var rowNumber = pager.SkipEntity;
+        foreach (var record in records)
+        {
+            record.Row = ++rowNumber;
+        }
+
+        var result = new AdvanceDataTable<UserDataTableDto>
+        {
+            Records = records,
+            PageId = pager.PageId,
+            PageCount = pager.PageCount,
+            StartPage = pager.StartPage,
+            EndPage = pager.EndPage,
+            TakeEntity = pager.TakeEntity,
+            SkipEntity = pager.SkipEntity,
+            ActivePage = pager.ActivePage,
+        };
+
+        return result;
     }
 }
