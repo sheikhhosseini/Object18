@@ -15,7 +15,7 @@
     </div>
     <section class="section">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header pb-0">
                 <div class="row">
                     <h4 class="card-title">فهرست کاربران</h4>
                     <form class="col-sm-10">
@@ -49,10 +49,26 @@
                     </div>
                 </div>
             </div>
+            <hr>
             <div class="card-body">
-                <div class="row">
-                    <div class="ag-theme-alpine col-sm-12" id="myGrid" style="height: 40vh;"></div>
+                <div class="col-sm-12" style="background-color: #435ebe; direction: ltr" >
+                    <button type="button" class="btn btn-primary position-relative">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            1
+                            <span class="visually-hidden">unread messages</span>
+                        </span>
+                    </button>
+                    
+                    <button type="button" class="btn btn-primary position-relative ms-2">
+                        <i class="far fa-edit"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">
+                            1
+                            <span class="visually-hidden">unread messages</span>
+                        </span>
+                    </button>
                 </div>
+                <div class="ag-theme-alpine col-sm-12" id="myGrid" style="height: 40vh;"></div>
                 <br>
                 <div class="row justify-content-between">
                     <div class="col-sm-6">
@@ -85,8 +101,30 @@
     </section>
 </div>
 
+<div class="col-12 col-md-4">
+    <button id="top-center" onclick="test()" class="btn btn-outline-primary btn-block btn-lg">TopCenter</button>
+</div>
+
 @section Scripts {
     <script type="text/javascript">
+
+        function test() {
+            Toastify({
+                text: "This is toast in top center",
+                duration: 3000,
+                close: true,
+                gravity: "top",
+                position: "center",
+                backgroundColor: "#4fbe87"
+            }).showToast();
+        }
+
+
+
+
+
+
+
         var activePage = 1;
 
         $(document).ready(function() {
@@ -101,9 +139,9 @@
         function refresh() {
 
             $('form').trigger('reset');
-            $('select[name="sortOrder"]').prop('selectedIndex',0);
-            $('select[name="takeEntity"]').prop('selectedIndex',1);
-            
+            $('select[name="sortOrder"]').prop('selectedIndex', 0);
+            $('select[name="takeEntity"]').prop('selectedIndex', 1);
+
             var data = {
                 filters: $('form').serializeArray(),
                 sortOrder: $('select[name="sortOrder"]').val(),
@@ -114,7 +152,7 @@
 
         function onPageClick(input) {
             var pageId;
-            
+
             if (input === "next") {
                 pageId = activePage + 1;
             }
@@ -124,7 +162,7 @@
             else {
                 pageId = input;
             }
-            
+
             var data = {
                 filters: $('form').serializeArray(),
                 sortOrder: $('select[name="sortOrder"]').val(),
