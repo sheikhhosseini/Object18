@@ -41,6 +41,8 @@ public class UserDataTableDto
     public string Email { get; set; }
 
     public bool IsActive { get; set; }
+    
+    public int Row { get; set; }
 }
 
 public class UserDataTableDtoProfile : Profile

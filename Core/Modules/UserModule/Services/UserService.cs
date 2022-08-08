@@ -46,9 +46,17 @@ public class UserService : IUserService
         var pager = PageGenerator.Generate(pageCount, data.PageId, data.TakeEntity);
         var users = await query.Paging(pager).ToListAsync();
 
+        var records = _mapper.Map<List<UserDataTableDto>>(users);
+
+        var rowNumber = pager.SkipEntity;
+        foreach (var record in records)
+        {
+            record.Row = ++rowNumber;
+        }
+
         var result = new MyDataTable<UserDataTableDto>
         {
-            Records = _mapper.Map<List<UserDataTableDto>>(users),
+            Records = records,
             PageId = pager.PageId,
             PageCount = pager.PageCount,
             StartPage = pager.StartPage,
