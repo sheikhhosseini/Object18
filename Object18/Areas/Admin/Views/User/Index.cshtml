@@ -100,7 +100,7 @@
                         if (i === result.activePage) {
                             pagination += '<li class="page-item pages active"><button class="page-link">' + i + '</button></li>';
                         } else {
-                            pagination += '<li class="page-item pages"><button class="page-link">' + i + '</button></li>';
+                            pagination += '<li class="page-item pages"><button class="page-link" onclick="onPageClick('+i+')" >' + i + '</button></li>';
                         }
                     }
                     $('#previous').after(pagination);
@@ -111,8 +111,9 @@
 
         function onNextClick() {
             var data = {
-                filters: $('form').serializeArray(), sortOrder: $('select[name="sortOrder"]').val()
-                , pageId: activePage + 1
+                filters: $('form').serializeArray(),
+                sortOrder: $('select[name="sortOrder"]').val(),
+                pageId: activePage + 1
             };
             $.ajax({
                 type: "POST",
@@ -130,7 +131,7 @@
                         if (i === result.activePage) {
                             pagination += '<li class="page-item pages active"><button class="page-link">' + i + '</button></li>';
                         } else {
-                            pagination += '<li class="page-item pages"><button class="page-link">' + i + '</button></li>';
+                            pagination += '<li class="page-item pages"><button class="page-link" onclick="onPageClick('+i+')" >' + i + '</button></li>';
                         }
                     }
                     $('#previous').after(pagination);
@@ -140,8 +141,9 @@
 
         function onPreviousClick() {
             var data = {
-                filters: $('form').serializeArray(), sortOrder: $('select[name="sortOrder"]').val()
-                , pageId: activePage - 1
+                filters: $('form').serializeArray(),
+                sortOrder: $('select[name="sortOrder"]').val(),
+                pageId: activePage - 1
             };
             $.ajax({
                 type: "POST",
@@ -159,7 +161,37 @@
                         if (i === result.activePage) {
                             pagination += '<li class="page-item pages active"><button class="page-link">' + i + '</button></li>';
                         } else {
-                            pagination += '<li class="page-item pages"><button class="page-link">' + i + '</button></li>';
+                            pagination += '<li class="page-item pages"><button class="page-link" onclick="onPageClick('+i+')" >' + i + '</button></li>';
+                        }
+                    }
+                    $('#previous').after(pagination);
+                }
+            });
+        }
+
+        function onPageClick(pageNumber) {
+            var data = {
+                filters: $('form').serializeArray(),
+                sortOrder: $('select[name="sortOrder"]').val(),
+                pageId: pageNumber
+            };
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: 'https://@Context.Request.Host/Admin/User/GridAjax',
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: function(result) {
+                    gridOptions.api.setRowData(result.records);
+                    activePage = result.activePage;
+
+                    $('.pages').remove();
+                    var pagination = '';
+                    for (var i = result.startPage; i <= result.endPage; i++) {
+                        if (i === result.activePage) {
+                            pagination += '<li class="page-item pages active"><button class="page-link">' + i + '</button></li>';
+                        } else {
+                            pagination += '<li class="page-item pages"><button class="page-link" onclick="onPageClick('+i+')" >' + i + '</button></li>';
                         }
                     }
                     $('#previous').after(pagination);
@@ -168,8 +200,6 @@
         }
 
 
-
-        
         function Submit() {
             var data = { filters: $('form').serializeArray(), sortOrder: $('select[name="sortOrder"]').val() };
             $.ajax({
@@ -180,6 +210,18 @@
                 data: JSON.stringify(data),
                 success: function(result) {
                     gridOptions.api.setRowData(result.records);
+                    activePage = result.activePage;
+
+                    $('.pages').remove();
+                    var pagination = '';
+                    for (var i = result.startPage; i <= result.endPage; i++) {
+                        if (i === result.activePage) {
+                            pagination += '<li class="page-item pages active"><button class="page-link">' + i + '</button></li>';
+                        } else {
+                            pagination += '<li class="page-item pages"><button class="page-link" onclick="onPageClick('+i+')" >' + i + '</button></li>';
+                        }
+                    }
+                    $('#previous').after(pagination);
                 }
             });
         }
