@@ -119,6 +119,90 @@
 
 @section Scripts {
     <script type="text/javascript">
+
+        function onKeyNameChange(input) {
+            var selectedKeyName = input.value;
+
+            var selectedFilterType = filters.find(x => x.name === selectedKeyName).type;
+            var operatorId = "operator" + input.id;
+            var $el = $("#" + operatorId);
+            $el.empty();
+
+
+            const textTypeOperators = [
+                {
+                    name: "شامل میشود",
+                    value: "=*"
+                },
+                {
+                    name: "شامل نمیشود",
+                    value: "!*"
+                },
+                {
+                    name: "برابر با",
+                    value: "="
+                },
+                {
+                    name: "نابرابر با",
+                    value: "!*"
+                }
+            ];
+
+            const numberTypeOperators = [
+                {
+                    name: "برابر با",
+                    value: "="
+                },
+                {
+                    name: "نابرابر با",
+                    value: "!*"
+                },
+                {
+                    name: "بزرگتر از",
+                    value: ">"
+                },
+                {
+                    name: "کوچکتر از",
+                    value: "<"
+                }
+            ];
+
+            const listTypeOperators = [
+                {
+                    name: "شامل میشود",
+                    value: "=*"
+                },
+                {
+                    name: "شامل نمیشود",
+                    value: "!*"
+                }
+            ];
+
+            if (selectedFilterType === "text") {
+                $.each(textTypeOperators, function(key,value) {
+                    $el.append($("<option></option>")
+                        .attr("value", value).text(textTypeOperators[key].name));
+                });
+            } else if (selectedFilterType === "number") {
+                $.each(numberTypeOperators, function(key,value) {
+                    $el.append($("<option></option>")
+                        .attr("value", value).text(numberTypeOperators[key].name));
+                });
+            } else if (selectedFilterType === "list") {
+                $.each(listTypeOperators, function(key,value) {
+                    $el.append($("<option></option>")
+                        .attr("value", value).text(listTypeOperators[key].name));
+                });
+            }
+
+            
+
+
+
+        }
+
+
+        var filterIndex = 0;
         var selectedIds = [];
         var activePage = 1;
         var filterOperators = [
@@ -147,30 +231,30 @@
                 value: "<"
             }
         ];
-
+        // ToDo Add KeyType To Filters
         var filters = [
             {
                 name: "firstName",
                 label: "نام",
-                valueType: "text",
+                type: "text",
                 value: ""
             },
             {
                 name: "lastName",
                 label: "نام خانوادگی",
-                valueType: "text",
+                type: "text",
                 value: ""
             },
             {
                 name: "MobileNumber",
                 label: "شماره تلفن",
-                valueType: "text",
+                type: "number",
                 value: ""
             },
             {
                 name: "email",
                 label: "ایمیل",
-                valueType: "text",
+                type: "list",
                 value: ""
             }
         ];
@@ -221,6 +305,8 @@
         function generateFilter() {
             var result = '';
             var keyNameOptions = '';
+            var keyOperatorOptions = '';
+
             for (var i = 0; i < filters.length; i++) {
                 keyNameOptions += '<option ' +
                     'value="' +
@@ -228,15 +314,7 @@
                     '">' +
                     filters[i].label +
                     '</option>';
-            }
-            result += '<div class="col-sm-2 mb-2">' +
-                '<select name="keyName" class="form-control">' +
-                keyNameOptions +
-                '</select>' +
-                '</div>';
 
-            var keyOperatorOptions = '';
-            for (var i = 0; i < filterOperators.length; i++) {
                 keyOperatorOptions += '<option ' +
                     'value="' +
                     filterOperators[i].value +
@@ -245,7 +323,13 @@
                     '</option>';
             }
             result += '<div class="col-sm-2 mb-2">' +
-                '<select name="keyOperator" class="form-control" onchange="test()">' +
+                '<select id="' + filterIndex + '" name="keyName" class="form-control" onchange="onKeyNameChange(this)">' +
+                keyNameOptions +
+                '</select>' +
+                '</div>';
+
+            result += '<div class="col-sm-2 mb-2">' +
+                '<select id="operator' + filterIndex + '" name="keyOperator" class="form-control ">' +
                 keyOperatorOptions +
                 '</select>' +
                 '</div>';
@@ -253,7 +337,7 @@
             result += '<div class="col-sm-2 mb-2">' +
                 '<input name="keyValue" type="text" class="form-control">' +
                 '</div>';
-
+            filterIndex++;
             $(result).appendTo('#advancedSearch');
         }
 
