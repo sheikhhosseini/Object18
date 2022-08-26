@@ -20,15 +20,9 @@ public class MainDbContext : DbContext
     {
         return Set<TEntity>().AsNoTracking().AsQueryable();
     }
-
     public IQueryable<TEntity> GetEntityQueryById<TEntity>(long entityId) where TEntity : BaseModel
     {
         return Set<TEntity>().Where(e => e.Id == entityId);
-    }
-
-    public IQueryable<TEntity> GetEntityQueryByIdAsNoTracking<TEntity>(long entityId) where TEntity : BaseModel
-    {
-        return Set<TEntity>().AsNoTracking().Where(e => e.Id == entityId);
     }
 
     public async Task AddEntityAsync<TEntity>(TEntity entity, bool log = false) where TEntity : BaseModel
@@ -49,53 +43,53 @@ public class MainDbContext : DbContext
         }
     }
 
-    public async Task UpdateEntityAsync<TEntity>(TEntity entity, bool log = false) where TEntity : BaseModel
+    public void UpdateEntityAsync<TEntity>(TEntity entity) where TEntity : BaseModel
     {
         entity.LastUpdateDate = DateTime.Now;
-        if (log)
-        {
-            string oldValues = JsonConvert.SerializeObject(GetEntityQueryByIdAsNoTracking<TEntity>(entity.Id).FirstOrDefault());
-            string newValues = JsonConvert.SerializeObject(entity);
-            await AddAsync(new LogCenter
-            {
-                EntityName = entity.GetType().Name,
-                Action = entity.IsDelete ? LogType.SoftDelete : LogType.Update,
-                CreateDate = entity.LastUpdateDate,
-                EntityOldValues = oldValues,
-                EntityNewValues = newValues
-            });
-        }
+        //if (log)
+        //{
+        //    string oldValues = JsonConvert.SerializeObject(GetEntityQueryByIdAsNoTracking<TEntity>(entity.Id).FirstOrDefault());
+        //    string newValues = JsonConvert.SerializeObject(entity);
+        //    await AddAsync(new LogCenter
+        //    {
+        //        EntityName = entity.GetType().Name,
+        //        Action = entity.IsDelete ? LogType.SoftDelete : LogType.Update,
+        //        CreateDate = entity.LastUpdateDate,
+        //        EntityOldValues = oldValues,
+        //        EntityNewValues = newValues
+        //    });
+        //}
     }
 
     public async Task UpdateEntityAsNoTrackingAsync<TEntity>(TEntity entity, bool log = false) where TEntity : BaseModel
     {
         entity.LastUpdateDate = DateTime.Now;
         Update(entity);
-        if (log)
-        {
-            string oldValues = JsonConvert.SerializeObject(GetEntityQueryByIdAsNoTracking<TEntity>(entity.Id).FirstOrDefault());
-            string newValues = JsonConvert.SerializeObject(entity);
-            await AddAsync(new LogCenter
-            {
-                EntityName = entity.GetType().Name,
-                Action = entity.IsDelete ? LogType.SoftDelete : LogType.Update,
-                CreateDate = entity.LastUpdateDate,
-                EntityOldValues = oldValues,
-                EntityNewValues = newValues
-            });
-        }
+        //if (log)
+        //{
+        //    string oldValues = JsonConvert.SerializeObject(GetEntityQueryByIdAsNoTracking<TEntity>(entity.Id).FirstOrDefault());
+        //    string newValues = JsonConvert.SerializeObject(entity);
+        //    await AddAsync(new LogCenter
+        //    {
+        //        EntityName = entity.GetType().Name,
+        //        Action = entity.IsDelete ? LogType.SoftDelete : LogType.Update,
+        //        CreateDate = entity.LastUpdateDate,
+        //        EntityOldValues = oldValues,
+        //        EntityNewValues = newValues
+        //    });
+        //}
     }
 
-    public async Task SoftRemoveEntityWithLogAsync<TEntity>(TEntity entity, bool log) where TEntity : BaseModel
+    public void SoftRemoveEntity<TEntity>(TEntity entity) where TEntity : BaseModel
     {
         entity.IsDelete = true;
-        await UpdateEntityAsync(entity, log);
+        UpdateEntityAsync(entity);
     }
 
     public async Task SoftRemoveEntityByIdWithLogAsync<TEntity>(long entityId, bool log) where TEntity : BaseModel
     {
         var entity = await GetEntityQueryById<TEntity>(entityId).SingleAsync();
-        await SoftRemoveEntityWithLogAsync(entity, log);
+        SoftRemoveEntity(entity);
     }
 
     public async Task HardRemoveEntityWithLogAsync<TEntity>(TEntity entity, bool log) where TEntity : BaseModel

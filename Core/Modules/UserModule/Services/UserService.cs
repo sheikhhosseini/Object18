@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using Core.Modules.UserModule.Dtos;
 using Core.Shared.Paging;
+using Core.Shared.Tools;
 using Data.Context;
 using Data.Models;
 using Gridify;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 
 namespace Core.Modules.UserModule.Services;
@@ -53,8 +55,17 @@ public class UserService : IUserService
 
         _mapper.Map(updateDto, existingUser);
 
-        await _dbContext.UpdateEntityAsync(existingUser);
+        _dbContext.UpdateEntityAsync(existingUser);
         await _dbContext.SaveChangesAsync();
+
+        var x = new OperationResult<UserUpdateDto>
+        {
+            Type = OperationResultType.Single,
+            Response = Response.Success,
+            Message = "",
+            Record = new UserUpdateDto()
+        };
+        
         return null;
     }
 
@@ -67,9 +78,25 @@ public class UserService : IUserService
         return _mapper.Map<UserUpdateDto>(existingUser);
     }
 
-    public async Task<UserUpdateDto> Delete(List<UserDeleteDto> deleteDtos)
+    public async Task<OperationResult<UserUpdateDto>> Delete(List<long> deleteDtos)
     {
-        throw new NotImplementedException();
+        var users = await _dbContext.GetEntitiesQuery<User>()
+            .Where(u => deleteDtos.Contains(u.Id))
+            .ToListAsync();
+
+        foreach (var user in users)
+        {
+            _dbContext.SoftRemoveEntity(user);
+        }
+
+        await _dbContext.SaveChangesAsync();
+
+        return new OperationResult<UserUpdateDto>
+        {
+            Type = OperationResultType.Single,
+            Response = Response.Success,
+            Message = $"'{users.Count}' کاربر با موفقیت حذف شد",
+        };
     }
 
     private async Task<AdvanceDataTable<UserDataTableDto>> GeneratePages(

@@ -62,7 +62,7 @@ public class AccountService : IAccountService
             {
                 user.IsActive = true;
                 user.ActiveCode = MyUniqCode.GenerateActiveCode();
-                await _dbContext.UpdateEntityAsync(user, true);
+                _dbContext.UpdateEntityAsync(user);
                 await _dbContext.SaveChangesAsync();
                 return ActiveAccountResult.Success;
             }
