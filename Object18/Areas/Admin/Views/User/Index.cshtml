@@ -52,14 +52,14 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="card-title pt-3 text-white">لیست کاربران</h5>
                     <div>
-                        <button type="button" class="btn btn-primary position-relative ml-1">
+                        <button id="editButton" hidden="true" type="button" class="btn btn-primary position-relative ml-1">
                             <i class="fe fe-24 fe-edit-2"></i>
-                            <span style="font-size: 100%;" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">
+                            <span style="font-size: 100%;" id="editBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">
                                 0
                             </span>
                         </button>
-                        
-                        <button type="button" class="btn btn-primary position-relative" onclick="deleteEvent()">
+
+                        <button id="deleteButton" hidden="true" type="button" class="btn btn-primary position-relative" onclick="deleteEvent()">
                             <i class="fe fe-24 fe-trash-2" aria-hidden="true"></i>
                             <span style="font-size: 100%;" id="deleteBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                 0
@@ -103,6 +103,7 @@
 
 @section Scripts {
     <script type="text/javascript">
+
         function deleteEvent() {
             var swalWithBootstrapButtons = Swal.mixin({
                 customClass: {
@@ -138,8 +139,7 @@
                                     close: true,
                                     gravity: "top",
                                     position: "center",
-                                    style:{background:"#4fbe87"}
-                                    //backgroundColor:} "#4fbe87"
+                                    backgroundColor: "#4fbe87"
                                 }).showToast();
                             }
                             if (result.response === 1) {
@@ -149,7 +149,7 @@
                                     close: true,
                                     gravity: "top",
                                     position: "center",
-                                    style:{background:"#eb811e"}
+                                    backgroundColor: "#eb811e"
                                 }).showToast();
                             }
                             if (result.response === 2) {
@@ -159,7 +159,7 @@
                                     close: true,
                                     gravity: "top",
                                     position: "center",
-                                    style:{background:"#f0210e"}
+                                    backgroundColor: "#f0210e"
                                 }).showToast();
                             }
                         },
@@ -182,6 +182,10 @@
         var activePage = 1;
 
         $(document).ready(function() {
+            $("#deleteButton").hide();
+            $("#editButton").hide();
+            $('#deleteButton').removeAttr('hidden');
+            $('#editButton').removeAttr('hidden');
             var data = {
                 filters: $('form').serializeArray(),
                 sortOrder: $('select[name="sortOrder"]').val(),
@@ -191,7 +195,6 @@
         });
 
         function refresh() {
-
             $('form').trigger('reset');
             $('select[name="sortOrder"]').prop('selectedIndex', 0);
             $('select[name="takeEntity"]').prop('selectedIndex', 1);
@@ -277,7 +280,19 @@
             enableRtl: true,
             onSelectionChanged(event) {
                 selectedIds = event.api.getSelectedRows().map(row => row.id);
+                if (selectedIds.length > 0) {
+                    $("#deleteButton").fadeIn(300);
+                    if (selectedIds.length === 1) {
+                        $("#editButton").fadeIn(300);
+                    } else {
+                        $("#editButton").fadeOut(300);
+                    }
+                } else {
+                    $("#deleteButton").fadeOut(300);
+                    $("#editButton").fadeOut(300);
+                }
                 $('#deleteBadge').text(selectedIds.length);
+                $('#editBadge').text(selectedIds.length);
             }
 
         };
