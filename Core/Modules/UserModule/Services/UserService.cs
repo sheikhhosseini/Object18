@@ -29,12 +29,12 @@ public class UserService : IUserService
 
         foreach (var filter in data.Filters)
         {
-            if (!string.IsNullOrEmpty(filter.Value))
+            if (!string.IsNullOrEmpty(filter.KeyValue))
             {
-                query = query.ApplyFiltering($"{filter.Name} =* {filter.Value}");
+                query = query.ApplyFiltering($"{filter.KeyName} {filter.KeyOperator} {filter.KeyValue}");
             }
         }
-        query = query.ApplyOrdering($"createDate {data.SortOrder}");
+        //query = query.ApplyOrdering($"createDate {data.SortOrder}");
 
         return await GeneratePages(data, query);
     }

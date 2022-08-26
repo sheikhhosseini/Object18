@@ -11,7 +11,9 @@ public class AdvanceDataTable<TDataTableDto> : BasePaging
 
 public class Filter
 {
-    public string Name { get; set; }
+    public string KeyName { get; set; }
 
-    public string Value { get; set; }
+    public string KeyOperator { get; set; }
+
+    public string KeyValue { get; set; }
 }

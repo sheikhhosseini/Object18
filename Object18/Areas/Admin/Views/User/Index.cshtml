@@ -2,6 +2,18 @@
     ViewData["Title"] = "کاربران";
 }
 
+<style>
+    .btn-circle {
+        width: 40px;
+        height: 40px;
+        padding: 6px 0px;
+        border-radius: 50%;
+        text-align: center;
+        font-size: 12px;
+        line-height: 1.42857;
+    }
+</style>
+
 <div class="page-heading">
     <div class="page-title">
         <div class="row">
@@ -16,35 +28,37 @@
     <div class="card shadow">
         <div class="card-header pb-0">
             <div class="row">
-                <form class="col-sm-10">
-                    <div class="mb-3 row">
-                        <div class="col-sm-3">
-                            <label class="form-label">نام</label>
-                            <input name="firstName" type="text" class="form-control">
-                        </div>
-                        <div class="col-sm-3">
-                            <label class="form-label">ایمیل</label>
-                            <input name="email" type="text" class="form-control">
-                        </div>
-                        <div class="col-sm-3">
-                            <label class="form-label">تلفن</label>
-                            <input name="mobileNumber" type="text" class="form-control">
-                        </div>
-                        <div class="col-sm-1 position-relative">
-                            <button type="button" onclick="refresh()" class="btn btn-success position-absolute bottom-0">رفرش</button>
-                        </div>
-                        <div class="col-sm-2 position-relative">
-                            <button type="button" onclick="search()" class="btn btn-primary position-absolute bottom-0">جست و جو</button>
-                        </div>
+                <form class="col-sm-12">
+                    <div id="advancedSearch" class="row">
                     </div>
+
+                    <button type="button" onclick="generateFilter()" class="btn-circle btn btn-warning mb-2"
+                            data-toggle="tooltip" data-placement="top" title="افزودن فیلتر">
+                        <i class="fe fe-24 fe-plus-circle"></i>
+                    </button>
+                    <button type="button" onclick="search()" class="btn-circle btn btn-primary mb-2"
+                            data-toggle="tooltip" data-placement="top" title="جستجو">
+                        <i class="fe fe-24 fe-search"></i>
+                    </button>
+                    
+
+                    @*
+                    <div class="col-sm-1 position-relative">
+                    <button type="button" onclick="refresh()" class="btn btn-success position-absolute bottom-0">رفرش</button>
+                    </div>
+                    <div class="col-sm-2 position-relative">
+                    <button type="button" onclick="search()" class="btn btn-primary position-absolute bottom-0">جست و جو</button>
+                    </div>
+                    </div>*@
+
                 </form>
-                <div class="col-sm-2">
-                    <label class="form-label">مرتب سازی</label>
-                    <select onchange="search()" name="sortOrder" class="form-control">
-                        <option value="asc">صعودی</option>
-                        <option value="desc">نزولی</option>
-                    </select>
-                </div>
+                @*<div class="col-sm-2">
+                <label class="form-label">مرتب سازی</label>
+                <select onchange="search()" name="sortOrder" class="form-control">
+                <option value="asc">صعودی</option>
+                <option value="desc">نزولی</option>
+                </select>
+                </div>*@
             </div>
         </div>
         <div class="card-body">
@@ -52,14 +66,16 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="card-title pt-3 text-white">لیست کاربران</h5>
                     <div>
-                        <button id="editButton" hidden="true" type="button" class="btn btn-primary position-relative ml-1">
+                        <button id="editButton" hidden="true" type="button" class="btn btn-primary position-relative ml-1"
+                                data-toggle="tooltip" data-placement="top" title="ویرایش">
                             <i class="fe fe-24 fe-edit-2"></i>
                             <span style="font-size: 100%;" id="editBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">
                                 0
                             </span>
                         </button>
 
-                        <button id="deleteButton" hidden="true" type="button" class="btn btn-primary position-relative" onclick="deleteEvent()">
+                        <button id="deleteButton" hidden="true" type="button" class="btn btn-primary position-relative" onclick="deleteEvent()"
+                                data-toggle="tooltip" data-placement="top" title="حذف">
                             <i class="fe fe-24 fe-trash-2" aria-hidden="true"></i>
                             <span style="font-size: 100%;" id="deleteBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                 0
@@ -103,6 +119,187 @@
 
 @section Scripts {
     <script type="text/javascript">
+        var selectedIds = [];
+        var activePage = 1;
+        var filterOperators = [
+            {
+                name: "شامل میشود",
+                value: "=*"
+            },
+            {
+                name: "شامل نمیشود",
+                value: "!*"
+            },
+            {
+                name: "برابر با",
+                value: "="
+            },
+            {
+                name: "نابرابر با",
+                value: "!*"
+            },
+            {
+                name: "بزرگتر از",
+                value: ">"
+            },
+            {
+                name: "کوچکتر از",
+                value: "<"
+            }
+        ];
+
+        var filters = [
+            {
+                name: "firstName",
+                label: "نام",
+                valueType: "text",
+                value: ""
+            },
+            {
+                name: "lastName",
+                label: "نام خانوادگی",
+                valueType: "text",
+                value: ""
+            },
+            {
+                name: "MobileNumber",
+                label: "شماره تلفن",
+                valueType: "text",
+                value: ""
+            },
+            {
+                name: "email",
+                label: "ایمیل",
+                valueType: "text",
+                value: ""
+            }
+        ];
+
+        $(document).ready(function() {
+            $("#deleteButton").hide();
+            $("#editButton").hide();
+            $('#deleteButton').removeAttr('hidden');
+            $('#editButton').removeAttr('hidden');
+
+            generateFilter();
+
+            var data = {
+                filters: GetFilterData(),
+                sortOrder: $('select[name="sortOrder"]').val(),
+                takeEntity: $('select[name="takeEntity"]').val()
+            };
+            fetchDataFromServer(data);
+        });
+
+        function GetFilterData() {
+            var formResult = $('form').serializeArray();
+            var keyNames = [];
+            var keyOperators = [];
+            var keyValues = [];
+
+            keyNames = formResult.filter(form => form.name === "keyName")
+                .map(form => form.value);
+            keyOperators = formResult.filter(form => form.name === "keyOperator")
+                .map(form => form.value);
+            keyValues = formResult.filter(form => form.name === "keyValue")
+                .map(form => form.value);;
+
+            var finalData = [];
+
+            for (var j = 0; j < keyNames.length; j++) {
+                finalData.push(
+                    {
+                        keyName: keyNames[j],
+                        keyOperator: keyOperators[j],
+                        keyValue: keyValues[j]
+                    });
+            }
+
+            return finalData;
+        }
+
+        function generateFilter() {
+            var result = '';
+            var keyNameOptions = '';
+            for (var i = 0; i < filters.length; i++) {
+                keyNameOptions += '<option ' +
+                    'value="' +
+                    filters[i].name +
+                    '">' +
+                    filters[i].label +
+                    '</option>';
+            }
+            result += '<div class="col-sm-2 mb-2">' +
+                '<select name="keyName" class="form-control">' +
+                keyNameOptions +
+                '</select>' +
+                '</div>';
+
+            var keyOperatorOptions = '';
+            for (var i = 0; i < filterOperators.length; i++) {
+                keyOperatorOptions += '<option ' +
+                    'value="' +
+                    filterOperators[i].value +
+                    '">' +
+                    filterOperators[i].name +
+                    '</option>';
+            }
+            result += '<div class="col-sm-2 mb-2">' +
+                '<select name="keyOperator" class="form-control" onchange="test()">' +
+                keyOperatorOptions +
+                '</select>' +
+                '</div>';
+
+            result += '<div class="col-sm-2 mb-2">' +
+                '<input name="keyValue" type="text" class="form-control">' +
+                '</div>';
+
+            $(result).appendTo('#advancedSearch');
+        }
+
+        function refresh() {
+            $('form').trigger('reset');
+            $('select[name="sortOrder"]').prop('selectedIndex', 0);
+            $('select[name="takeEntity"]').prop('selectedIndex', 1);
+
+            var data = {
+                filters: GetFilterData(),
+                sortOrder: $('select[name="sortOrder"]').val(),
+                takeEntity: $('select[name="takeEntity"]').val()
+            };
+            fetchDataFromServer(data);
+        }
+
+        function onPageClick(input) {
+            var pageId;
+
+            if (input === "next") {
+                pageId = activePage + 1;
+            }
+            else if (input === "previous") {
+                pageId = activePage - 1;
+            }
+            else {
+                pageId = input;
+            }
+
+            var data = {
+                filters: GetFilterData(),
+                sortOrder: $('select[name="sortOrder"]').val(),
+                takeEntity: $('select[name="takeEntity"]').val(),
+                pageId: pageId
+            };
+            fetchDataFromServer(data);
+        }
+
+        function search() {
+            var data = {
+                filters: GetFilterData(),
+                sortOrder: $('select[name="sortOrder"]').val(),
+                takeEntity: $('select[name="takeEntity"]').val()
+            };
+            fetchDataFromServer(data);
+        }
 
         function deleteEvent() {
             var swalWithBootstrapButtons = Swal.mixin({
@@ -177,67 +374,6 @@
             return false;
         }
 
-        var selectedIds = [];
-
-        var activePage = 1;
-
-        $(document).ready(function() {
-            $("#deleteButton").hide();
-            $("#editButton").hide();
-            $('#deleteButton').removeAttr('hidden');
-            $('#editButton').removeAttr('hidden');
-            var data = {
-                filters: $('form').serializeArray(),
-                sortOrder: $('select[name="sortOrder"]').val(),
-                takeEntity: $('select[name="takeEntity"]').val()
-            };
-            fetchDataFromServer(data);
-        });
-
-        function refresh() {
-            $('form').trigger('reset');
-            $('select[name="sortOrder"]').prop('selectedIndex', 0);
-            $('select[name="takeEntity"]').prop('selectedIndex', 1);
-
-            var data = {
-                filters: $('form').serializeArray(),
-                sortOrder: $('select[name="sortOrder"]').val(),
-                takeEntity: $('select[name="takeEntity"]').val()
-            };
-            fetchDataFromServer(data);
-        }
-
-        function onPageClick(input) {
-            var pageId;
-
-            if (input === "next") {
-                pageId = activePage + 1;
-            }
-            else if (input === "previous") {
-                pageId = activePage - 1;
-            }
-            else {
-                pageId = input;
-            }
-
-            var data = {
-                filters: $('form').serializeArray(),
-                sortOrder: $('select[name="sortOrder"]').val(),
-                takeEntity: $('select[name="takeEntity"]').val(),
-                pageId: pageId
-            };
-            fetchDataFromServer(data);
-        }
-
-        function search() {
-            var data = {
-                filters: $('form').serializeArray(),
-                sortOrder: $('select[name="sortOrder"]').val(),
-                takeEntity: $('select[name="takeEntity"]').val()
-            };
-            fetchDataFromServer(data);
-        }
-
         // Grid Options
         const columnDefs = [
             {
@@ -294,7 +430,6 @@
                 $('#deleteBadge').text(selectedIds.length);
                 $('#editBadge').text(selectedIds.length);
             }
-
         };
         const eGridDiv = document.getElementById("myGrid");
         new agGrid.Grid(eGridDiv, gridOptions);
