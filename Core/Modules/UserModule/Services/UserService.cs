@@ -29,10 +29,23 @@ public class UserService : IUserService
 
         foreach (var filter in data.Filters)
         {
-            if (!string.IsNullOrEmpty(filter.KeyValue))
+            if (filter.KeyType == "text")
             {
-                query = query.ApplyFiltering($"{filter.KeyName} {filter.KeyOperator} {filter.KeyValue}");
+                query = query.ApplyFiltering($"{filter.KeyName} {filter.KeyOperator} {filter.KeyValue.First()}");
             }
+            else if (filter.KeyType == "number")
+            {
+                query = query.ApplyFiltering($"{filter.KeyName} {filter.KeyOperator} {filter.KeyValue.First()}");
+            }
+            else if (filter.KeyType == "list")
+            {
+
+            }
+
+            //if (!string.IsNullOrEmpty(filter.KeyValue))
+            //{
+            //    query = query.ApplyFiltering($"{filter.KeyName} {filter.KeyOperator} {filter.KeyValue}");
+            //}
         }
         //query = query.ApplyOrdering($"createDate {data.SortOrder}");
 

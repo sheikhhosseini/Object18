@@ -15,5 +15,7 @@ public class Filter
 
     public string KeyOperator { get; set; }
 
-    public string KeyValue { get; set; }
+    public string KeyType { get; set; }
+
+    public List<string> KeyValue { get; set; }
 }

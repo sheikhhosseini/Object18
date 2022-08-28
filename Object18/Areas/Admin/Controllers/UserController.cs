@@ -24,6 +24,26 @@ public class UserController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    public async Task<ActionResult> Test1(string data)
+    {
+        var result = new List<Sample>
+        {
+            new()
+            {
+                Id = 1,
+                Text = "aaa"
+            },
+            new()
+            {
+                Id = 2,
+                Text = "bbb"
+            }
+        };
+        return new JsonResult(result);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<ActionResult> GridAjax([FromBody] AdvanceDataTable<UserDataTableDto> data)
     {
         var result = await _userService.GetDataTable(data);
@@ -91,4 +111,10 @@ public class UserController : Controller
             return View();
         }
     }
+}
+
+public class Sample
+{
+    public int Id { get; set; }
+    public string Text { get; set; }
 }

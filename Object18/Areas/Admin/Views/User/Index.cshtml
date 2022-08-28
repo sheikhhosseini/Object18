@@ -31,17 +31,24 @@
                 <form class="col-sm-12">
                     <div id="advancedSearch" class="row">
                     </div>
-
-                    <button type="button" onclick="generateFilter()" class="btn-circle btn btn-warning mb-2"
-                            data-toggle="tooltip" data-placement="top" title="افزودن فیلتر">
-                        <i class="fe fe-24 fe-plus-circle"></i>
-                    </button>
                     <button type="button" onclick="search()" class="btn-circle btn btn-primary mb-2"
                             data-toggle="tooltip" data-placement="top" title="جستجو">
                         <i class="fe fe-24 fe-search"></i>
                     </button>
-                    
+                    <button type="button" onclick="generateFilter()" class="btn-circle btn btn-warning mb-2"
+                            data-toggle="tooltip" data-placement="top" title="افزودن فیلتر">
+                        <i class="fe fe-24 fe-plus-circle"></i>
+                    </button>
 
+                    @*<div class="col-md-12">
+                    <div class="form-group">
+                    <select class="js-example-basic-single col-sm-12" name="states[]" multiple="multiple">
+                    <option value="AL">Alabama</option>
+                    ...
+                    <option value="WY">Wyoming</option>
+                    </select>
+                    </div>
+                    </div>*@
                     @*
                     <div class="col-sm-1 position-relative">
                     <button type="button" onclick="refresh()" class="btn btn-success position-absolute bottom-0">رفرش</button>
@@ -50,6 +57,9 @@
                     <button type="button" onclick="search()" class="btn btn-primary position-absolute bottom-0">جست و جو</button>
                     </div>
                     </div>*@
+
+
+                    <cc></cc>
 
                 </form>
                 @*<div class="col-sm-2">
@@ -128,6 +138,7 @@
             var $el = $("#" + operatorId);
             $el.empty();
 
+            var $inputValue = $("#" + "value" + input.id);
 
             const textTypeOperators = [
                 {
@@ -179,26 +190,53 @@
             ];
 
             if (selectedFilterType === "text") {
-                $.each(textTypeOperators, function(key,value) {
-                    $el.append($("<option></option>")
-                        .attr("value", value).text(textTypeOperators[key].name));
-                });
+                $.each(textTypeOperators,
+                    function(key, value) {
+                        $el.append($("<option></option>")
+                            .attr("value", value.value).text(textTypeOperators[key].name));
+                    });
+                $inputValue.attr('type', 'text');
             } else if (selectedFilterType === "number") {
-                $.each(numberTypeOperators, function(key,value) {
-                    $el.append($("<option></option>")
-                        .attr("value", value).text(numberTypeOperators[key].name));
-                });
+                $.each(numberTypeOperators,
+                    function(key, value) {
+                        $el.append($("<option></option>")
+                            .attr("value", value.value).text(numberTypeOperators[key].name));
+                    });
+                $inputValue.attr('type', 'number');
             } else if (selectedFilterType === "list") {
-                $.each(listTypeOperators, function(key,value) {
-                    $el.append($("<option></option>")
-                        .attr("value", value).text(listTypeOperators[key].name));
+                $.each(listTypeOperators,
+                    function(key, value) {
+                        $el.append($("<option></option>")
+                            .attr("value", value.value).text(listTypeOperators[key].name));
+                    });
+
+
+                var select = '';
+                select =
+                    '<select id="value' + input.id + '" class="js-example-basic-single col-sm-12" name="keyValue" multiple="multiple">'
+
+                    + '</select>';
+
+                $inputValue.replaceWith(select);
+
+                $('.js-example-basic-single').select2({
+                    ajax: {
+                        headers: {
+                            RequestVerificationToken: $(".AntiForge" + " input").val()
+                        },
+                        type: "POST",
+                        dataType: "json",
+                        url: 'https://@Context.Request.Host/Admin/User/Test1',
+                        contentType: "application/json",
+                        data: JSON.stringify('ss'),
+                        processResults: function(data) {
+                            return {
+                                results: data
+                            };
+                        }
+                    }
                 });
-            }
-
-            
-
-
-
+            };
         }
 
 
@@ -231,7 +269,7 @@
                 value: "<"
             }
         ];
-        // ToDo Add KeyType To Filters
+
         var filters = [
             {
                 name: "firstName",
@@ -285,8 +323,8 @@
                 .map(form => form.value);
             keyOperators = formResult.filter(form => form.name === "keyOperator")
                 .map(form => form.value);
-            keyValues = formResult.filter(form => form.name === "keyValue")
-                .map(form => form.value);;
+            //keyValues = formResult.filter(form => form.name === "keyValue")
+            //    .map(form => form.value);
 
             var finalData = [];
 
@@ -295,10 +333,13 @@
                     {
                         keyName: keyNames[j],
                         keyOperator: keyOperators[j],
-                        keyValue: keyValues[j]
+                        keyType: filters.filter(item => item.name === keyNames[j])[0].type,
+                        keyValue: Array.isArray($("#" + "value" + j).val()) 
+                            ? $("#" + "value" + j).val()
+                            : [$("#" + "value" + j).val()]
                     });
             }
-
+            console.log(finalData);
             return finalData;
         }
 
@@ -323,19 +364,25 @@
                     '</option>';
             }
             result += '<div class="col-sm-2 mb-2">' +
-                '<select id="' + filterIndex + '" name="keyName" class="form-control" onchange="onKeyNameChange(this)">' +
+                '<select id="' +
+                filterIndex +
+                '" name="keyName" class="form-control" onchange="onKeyNameChange(this)">' +
                 keyNameOptions +
                 '</select>' +
                 '</div>';
 
             result += '<div class="col-sm-2 mb-2">' +
-                '<select id="operator' + filterIndex + '" name="keyOperator" class="form-control ">' +
+                '<select id="operator' +
+                filterIndex +
+                '" name="keyOperator" class="form-control ">' +
                 keyOperatorOptions +
                 '</select>' +
                 '</div>';
 
             result += '<div class="col-sm-2 mb-2">' +
-                '<input name="keyValue" type="text" class="form-control">' +
+                '<input id="value' +
+                filterIndex +
+                '" name="keyValue" type="text" class="form-control">' +
                 '</div>';
             filterIndex++;
             $(result).appendTo('#advancedSearch');
@@ -359,11 +406,9 @@
 
             if (input === "next") {
                 pageId = activePage + 1;
-            }
-            else if (input === "previous") {
+            } else if (input === "previous") {
                 pageId = activePage - 1;
-            }
-            else {
+            } else {
                 pageId = input;
             }
 
@@ -534,15 +579,13 @@
 
                     if (result.activePage === 1) {
                         $('#previous').addClass('disabled');
-                    }
-                    else {
+                    } else {
                         $('#previous').removeClass('disabled');
                     }
 
                     if (result.activePage === result.endPage) {
                         $('#next').addClass('disabled');
-                    }
-                    else {
+                    } else {
                         $('#next').removeClass('disabled');
                     }
 

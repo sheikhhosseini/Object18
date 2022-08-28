@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="~/Ghaleb/css/app-dark.css" id="darkTheme" disabled>
     <!-- MySite CSS -->
     <link rel="stylesheet" href="~/MyLibs/Toastify/toastify.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/MyLibs/site.css">
 </head>
 <body class="vertical light rtl ">
@@ -176,7 +177,8 @@
         gtag('js', new Date());
         gtag('config', 'UA-56159088-1');
     </script>
-    <script src="~/MyLibs/Toastify/toastify.js"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+<script src="~/MyLibs/Toastify/toastify.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
