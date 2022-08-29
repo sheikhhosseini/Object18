@@ -41,13 +41,15 @@ public class UserService : IUserService
             {
 
             }
-
-            //if (!string.IsNullOrEmpty(filter.KeyValue))
-            //{
-            //    query = query.ApplyFiltering($"{filter.KeyName} {filter.KeyOperator} {filter.KeyValue}");
-            //}
         }
-        //query = query.ApplyOrdering($"createDate {data.SortOrder}");
+
+        foreach (var sortOrder in data.SortOrder)
+        {
+            if (!string.IsNullOrEmpty(sortOrder.KeyName) && !string.IsNullOrEmpty(sortOrder.KeySort))
+            {
+                query = query.ApplyOrdering($"{sortOrder.KeyName} {sortOrder.KeySort}");
+            }
+        }
 
         return await GeneratePages(data, query);
     }

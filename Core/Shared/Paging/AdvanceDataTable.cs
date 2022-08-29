@@ -6,7 +6,7 @@ public class AdvanceDataTable<TDataTableDto> : BasePaging
 
     public List<Filter> Filters { get; set; }
 
-    public string SortOrder { get; set; } = "asc";
+    public List<SortOrder> SortOrder { get; set; }
 }
 
 public class Filter
@@ -18,4 +18,11 @@ public class Filter
     public string KeyType { get; set; }
 
     public List<string> KeyValue { get; set; }
+}
+
+public class SortOrder
+{
+    public string KeyName { get; set; }
+
+    public string KeySort { get; set; }
 }

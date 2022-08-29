@@ -239,6 +239,7 @@
             };
         }
 
+        var sortOrder = [{keyName: "", keySort: ""}];
 
         var filterIndex = 0;
         var selectedIds = [];
@@ -307,7 +308,7 @@
 
             var data = {
                 filters: GetFilterData(),
-                sortOrder: $('select[name="sortOrder"]').val(),
+                sortOrder: sortOrder,
                 takeEntity: $('select[name="takeEntity"]').val()
             };
             fetchDataFromServer(data);
@@ -339,7 +340,6 @@
                             : [$("#" + "value" + j).val()]
                     });
             }
-            console.log(finalData);
             return finalData;
         }
 
@@ -395,7 +395,7 @@
 
             var data = {
                 filters: GetFilterData(),
-                sortOrder: $('select[name="sortOrder"]').val(),
+                sortOrder: sortOrder,
                 takeEntity: $('select[name="takeEntity"]').val()
             };
             fetchDataFromServer(data);
@@ -414,7 +414,7 @@
 
             var data = {
                 filters: GetFilterData(),
-                sortOrder: $('select[name="sortOrder"]').val(),
+                sortOrder: sortOrder,
                 takeEntity: $('select[name="takeEntity"]').val(),
                 pageId: pageId
             };
@@ -424,9 +424,11 @@
         function search() {
             var data = {
                 filters: GetFilterData(),
-                sortOrder: $('select[name="sortOrder"]').val(),
+                sortOrder: sortOrder,
                 takeEntity: $('select[name="takeEntity"]').val()
             };
+
+            console.log(data);
             fetchDataFromServer(data);
         }
 
@@ -543,6 +545,19 @@
             },
             columnDefs: columnDefs,
             enableRtl: true,
+            animateRows: true,
+            onSortChanged(event) {
+                var colState = gridOptions.columnApi.getColumnState();
+                var sortState = colState
+                    .filter(function (s) {
+                        return s.sort != null;
+                    })
+                    .map(function (s) {
+                        return { keyName: s.colId, keySort: s.sort };
+                    });
+                sortOrder = sortState;
+                search();
+            },
             onSelectionChanged(event) {
                 selectedIds = event.api.getSelectedRows().map(row => row.id);
                 if (selectedIds.length > 0) {
