@@ -39,36 +39,7 @@
                             data-toggle="tooltip" data-placement="top" title="افزودن فیلتر">
                         <i class="fe fe-24 fe-plus-circle"></i>
                     </button>
-
-                    @*<div class="col-md-12">
-                    <div class="form-group">
-                    <select class="js-example-basic-single col-sm-12" name="states[]" multiple="multiple">
-                    <option value="AL">Alabama</option>
-                    ...
-                    <option value="WY">Wyoming</option>
-                    </select>
-                    </div>
-                    </div>*@
-                    @*
-                    <div class="col-sm-1 position-relative">
-                    <button type="button" onclick="refresh()" class="btn btn-success position-absolute bottom-0">رفرش</button>
-                    </div>
-                    <div class="col-sm-2 position-relative">
-                    <button type="button" onclick="search()" class="btn btn-primary position-absolute bottom-0">جست و جو</button>
-                    </div>
-                    </div>*@
-
-
-                    <cc></cc>
-
                 </form>
-                @*<div class="col-sm-2">
-                <label class="form-label">مرتب سازی</label>
-                <select onchange="search()" name="sortOrder" class="form-control">
-                <option value="asc">صعودی</option>
-                <option value="desc">نزولی</option>
-                </select>
-                </div>*@
             </div>
         </div>
         <div class="card-body">
@@ -129,6 +100,125 @@
 
 @section Scripts {
     <script type="text/javascript">
+        $(document).ready(function() {
+            $("#deleteButton").hide();
+            $("#editButton").hide();
+            $('#deleteButton').removeAttr('hidden');
+            $('#editButton').removeAttr('hidden');
+
+            generateFilter();
+
+            var data = {
+                filters: GetFilterData(),
+                sortOrder: sortOrder,
+                takeEntity: $('select[name="takeEntity"]').val()
+            };
+            fetchDataFromServer(data);
+        });
+
+        var sortOrder = [{keyName: "", keySort: ""}];
+        var filterIndex = 0;
+        var selectedIds = [];
+        var activePage = 1;
+
+        var filterOperators = [
+            {
+                name: "شامل میشود",
+                value: "=*"
+            },
+            {
+                name: "شامل نمیشود",
+                value: "!*"
+            },
+            {
+                name: "برابر با",
+                value: "="
+            },
+            {
+                name: "نابرابر با",
+                value: "!*"
+            },
+            {
+                name: "بزرگتر از",
+                value: ">"
+            },
+            {
+                name: "کوچکتر از",
+                value: "<"
+            }
+        ];
+        var filters = [
+            {
+                name: "firstName",
+                label: "نام",
+                type: "text",
+                value: ""
+            },
+            {
+                name: "lastName",
+                label: "نام خانوادگی",
+                type: "text",
+                value: ""
+            },
+            {
+                name: "MobileNumber",
+                label: "شماره تلفن",
+                type: "number",
+                value: ""
+            },
+            {
+                name: "email",
+                label: "ایمیل",
+                type: "list",
+                value: "",
+                dataSourceUrl: 'https://@Context.Request.Host/Admin/User/Test1'
+            }
+        ];
+
+        function generateFilter() {
+            var result = '';
+            var keyNameOptions = '';
+            var keyOperatorOptions = '';
+
+            for (var i = 0; i < filters.length; i++) {
+                keyNameOptions += '<option ' +
+                    'value="' +
+                    filters[i].name +
+                    '">' +
+                    filters[i].label +
+                    '</option>';
+
+                keyOperatorOptions += '<option ' +
+                    'value="' +
+                    filterOperators[i].value +
+                    '">' +
+                    filterOperators[i].name +
+                    '</option>';
+            }
+            result += '<div class="col-sm-2 mb-2">' +
+                '<select id="' +
+                filterIndex +
+                '" name="keyName" class="form-control" onchange="onKeyNameChange(this)">' +
+                keyNameOptions +
+                '</select>' +
+                '</div>';
+
+            result += '<div class="col-sm-2 mb-2">' +
+                '<select id="operator' +
+                filterIndex +
+                '" name="keyOperator" class="form-control ">' +
+                keyOperatorOptions +
+                '</select>' +
+                '</div>';
+
+            result += '<div class="col-sm-2 mb-2">' +
+                '<input id="value' +
+                filterIndex +
+                '" name="keyValue" type="text" class="form-control">' +
+                '</div>';
+            filterIndex++;
+            $(result).appendTo('#advancedSearch');
+        }
 
         function onKeyNameChange(input) {
             var selectedKeyName = input.value;
@@ -210,7 +300,6 @@
                             .attr("value", value.value).text(listTypeOperators[key].name));
                     });
 
-
                 var select = '';
                 select =
                     '<select id="value' + input.id + '" class="js-example-basic-single col-sm-12" name="keyValue" multiple="multiple">'
@@ -219,6 +308,8 @@
 
                 $inputValue.replaceWith(select);
 
+                var selectedFilterDataSourceUrl = filters.find(x => x.name === selectedKeyName).dataSourceUrl;
+
                 $('.js-example-basic-single').select2({
                     ajax: {
                         headers: {
@@ -226,7 +317,7 @@
                         },
                         type: "POST",
                         dataType: "json",
-                        url: 'https://@Context.Request.Host/Admin/User/Test1',
+                        url: selectedFilterDataSourceUrl,
                         contentType: "application/json",
                         data: JSON.stringify('ss'),
                         processResults: function(data) {
@@ -239,93 +330,15 @@
             };
         }
 
-        var sortOrder = [{keyName: "", keySort: ""}];
-
-        var filterIndex = 0;
-        var selectedIds = [];
-        var activePage = 1;
-        var filterOperators = [
-            {
-                name: "شامل میشود",
-                value: "=*"
-            },
-            {
-                name: "شامل نمیشود",
-                value: "!*"
-            },
-            {
-                name: "برابر با",
-                value: "="
-            },
-            {
-                name: "نابرابر با",
-                value: "!*"
-            },
-            {
-                name: "بزرگتر از",
-                value: ">"
-            },
-            {
-                name: "کوچکتر از",
-                value: "<"
-            }
-        ];
-
-        var filters = [
-            {
-                name: "firstName",
-                label: "نام",
-                type: "text",
-                value: ""
-            },
-            {
-                name: "lastName",
-                label: "نام خانوادگی",
-                type: "text",
-                value: ""
-            },
-            {
-                name: "MobileNumber",
-                label: "شماره تلفن",
-                type: "number",
-                value: ""
-            },
-            {
-                name: "email",
-                label: "ایمیل",
-                type: "list",
-                value: ""
-            }
-        ];
-
-        $(document).ready(function() {
-            $("#deleteButton").hide();
-            $("#editButton").hide();
-            $('#deleteButton').removeAttr('hidden');
-            $('#editButton').removeAttr('hidden');
-
-            generateFilter();
-
-            var data = {
-                filters: GetFilterData(),
-                sortOrder: sortOrder,
-                takeEntity: $('select[name="takeEntity"]').val()
-            };
-            fetchDataFromServer(data);
-        });
-
         function GetFilterData() {
             var formResult = $('form').serializeArray();
             var keyNames = [];
             var keyOperators = [];
-            var keyValues = [];
 
             keyNames = formResult.filter(form => form.name === "keyName")
                 .map(form => form.value);
             keyOperators = formResult.filter(form => form.name === "keyOperator")
                 .map(form => form.value);
-            //keyValues = formResult.filter(form => form.name === "keyValue")
-            //    .map(form => form.value);
 
             var finalData = [];
 
@@ -341,51 +354,6 @@
                     });
             }
             return finalData;
-        }
-
-        function generateFilter() {
-            var result = '';
-            var keyNameOptions = '';
-            var keyOperatorOptions = '';
-
-            for (var i = 0; i < filters.length; i++) {
-                keyNameOptions += '<option ' +
-                    'value="' +
-                    filters[i].name +
-                    '">' +
-                    filters[i].label +
-                    '</option>';
-
-                keyOperatorOptions += '<option ' +
-                    'value="' +
-                    filterOperators[i].value +
-                    '">' +
-                    filterOperators[i].name +
-                    '</option>';
-            }
-            result += '<div class="col-sm-2 mb-2">' +
-                '<select id="' +
-                filterIndex +
-                '" name="keyName" class="form-control" onchange="onKeyNameChange(this)">' +
-                keyNameOptions +
-                '</select>' +
-                '</div>';
-
-            result += '<div class="col-sm-2 mb-2">' +
-                '<select id="operator' +
-                filterIndex +
-                '" name="keyOperator" class="form-control ">' +
-                keyOperatorOptions +
-                '</select>' +
-                '</div>';
-
-            result += '<div class="col-sm-2 mb-2">' +
-                '<input id="value' +
-                filterIndex +
-                '" name="keyValue" type="text" class="form-control">' +
-                '</div>';
-            filterIndex++;
-            $(result).appendTo('#advancedSearch');
         }
 
         function refresh() {
@@ -427,8 +395,6 @@
                 sortOrder: sortOrder,
                 takeEntity: $('select[name="takeEntity"]').val()
             };
-
-            console.log(data);
             fetchDataFromServer(data);
         }
 
@@ -546,7 +512,7 @@
             columnDefs: columnDefs,
             enableRtl: true,
             animateRows: true,
-            onSortChanged(event) {
+            onSortChanged() {
                 var colState = gridOptions.columnApi.getColumnState();
                 var sortState = colState
                     .filter(function (s) {
@@ -622,4 +588,3 @@
         }
     </script>
 }
-
