@@ -9,6 +9,8 @@ public class Role : BaseModel
     public string RoleDescription { get; set; }
 
     public ICollection<UserRole> UserRoles { get; set; }
+
+    public ICollection<RolePermission> RolePermissions { get; set; }
 }
 
 public class RoleConfig : IEntityTypeConfiguration<Role>

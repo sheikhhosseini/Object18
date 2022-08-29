@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
+using AutoMapper;
 using Core.Modules.AccountModule.Dtos;
 using Core.Modules.AccountModule.Results;
 using Core.Shared.Email;
@@ -73,9 +75,11 @@ public class AccountService : IAccountService
 
     public async Task<LoginResult> LoginUser(LoginDto loginDto)
     {
-        var user = await _dbContext.Set<User>().SingleOrDefaultAsync(
-            u => u.Email == loginDto.Email
-            && u.Password == loginDto.Password.EncodePasswordMd5());
+        var user = await _dbContext.Set<User>()
+            .AsNoTracking()
+            .SingleOrDefaultAsync(u => 
+                u.Email == loginDto.Email 
+                && u.Password == loginDto.Password.EncodePasswordMd5());
 
         if (user is null)
             return new LoginResult { Status = LoginStatus.Failed, User = null };
@@ -83,6 +87,18 @@ public class AccountService : IAccountService
         if (!user.IsActive)
             return new LoginResult { Status = LoginStatus.NotActivated, User = user };
 
-        return new LoginResult { Status = LoginStatus.Success, User = user };
+        List<Claim> claims = new();
+
+        var roleIds = await _dbContext.GetEntitiesAsNoTrackingQuery<UserRole>()
+            .Where(x => x.UserId == user.Id)
+            .Select(x => x.RoleId).ToArrayAsync();
+
+        var permissions = await _dbContext.GetEntitiesAsNoTrackingQuery<RolePermission>()
+            .Where(x => roleIds.Contains(x.RoleId))
+            .Select(x => x.Permission.PermissionName).ToListAsync();
+
+        permissions.ForEach(x=>claims.Add(new("permission", x)));
+
+        return new LoginResult { Status = LoginStatus.Success, User = user , Claims = claims};
     }
 }

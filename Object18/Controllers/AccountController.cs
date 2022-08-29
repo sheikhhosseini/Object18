@@ -99,8 +99,11 @@ public class AccountController : Controller
                     {
                         new (ClaimTypes.NameIdentifier,result.User.Id.ToString()),
                         new (ClaimTypes.Name,result.User.FullName),
-                        new (ClaimTypes.Email,result.User.Email),
+                        new (ClaimTypes.Email,result.User.Email)
                     };
+
+                    claims = claims.Concat(result.Claims).ToList();
+
                     var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                     var principal = new ClaimsPrincipal(identity);
 

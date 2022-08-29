@@ -19,7 +19,7 @@ public class HomeController : Controller
         return View();
     }
 
-    [Authorize]
+    [PermissionChecker(TestControllerPermissions.Update)]
     public async Task<IActionResult> Privacy()
     {
         return View();
