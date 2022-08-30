@@ -87,7 +87,12 @@ public class AccountService : IAccountService
         if (!user.IsActive)
             return new LoginResult { Status = LoginStatus.NotActivated, User = user };
 
-        List<Claim> claims = new();
+        List<Claim> claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(ClaimTypes.Name, user.FullName),
+            new(ClaimTypes.Email, user.Email)
+        };
 
         var roleIds = await _dbContext.GetEntitiesAsNoTrackingQuery<UserRole>()
             .Where(x => x.UserId == user.Id)
@@ -100,5 +105,18 @@ public class AccountService : IAccountService
         permissions.ForEach(x=>claims.Add(new("permission", x)));
 
         return new LoginResult { Status = LoginStatus.Success, User = user , Claims = claims};
+    }
+
+    public async Task<bool> HasPermission(long userId, string permissionName)
+    {
+        var roleIds = await _dbContext.GetEntitiesAsNoTrackingQuery<UserRole>()
+            .Where(x => x.UserId == userId)
+            .Select(x => x.RoleId).ToArrayAsync();
+
+        var permissions = await _dbContext.GetEntitiesAsNoTrackingQuery<RolePermission>()
+            .Where(x => roleIds.Contains(x.RoleId))
+            .Select(x => x.Permission.PermissionName).ToListAsync();
+
+        return permissions.Any(x => x == permissionName);
     }
 }

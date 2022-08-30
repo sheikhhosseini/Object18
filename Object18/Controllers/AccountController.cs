@@ -95,16 +95,7 @@ public class AccountController : Controller
             {
                 // cases 
                 case LoginStatus.Success:
-                    var claims = new List<Claim>
-                    {
-                        new (ClaimTypes.NameIdentifier,result.User.Id.ToString()),
-                        new (ClaimTypes.Name,result.User.FullName),
-                        new (ClaimTypes.Email,result.User.Email)
-                    };
-
-                    claims = claims.Concat(result.Claims).ToList();
-
-                    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var identity = new ClaimsIdentity(result.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
                     var principal = new ClaimsPrincipal(identity);
 
                     var properties = new AuthenticationProperties

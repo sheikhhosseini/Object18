@@ -9,4 +9,5 @@ public interface IAccountService
     Task<bool> IsUserExist(string email);
     Task<ActiveAccountResult> ActiveAccount(string activeCode);
     Task<LoginResult> LoginUser(LoginDto loginDto);
+    Task<bool> HasPermission(long userId, string permissionName);
 }

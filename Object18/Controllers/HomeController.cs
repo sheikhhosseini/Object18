@@ -2,6 +2,7 @@
 using Object18.Models;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
+using Object18.PermissionChecker;
 
 namespace Object18.Controllers;
 
@@ -19,7 +20,8 @@ public class HomeController : Controller
         return View();
     }
 
-    [PermissionChecker(TestControllerPermissions.Update)]
+    [Authorize]
+    [Permission(TestControllerPermissions.Privacy)]
     public async Task<IActionResult> Privacy()
     {
         return View();
