@@ -26,6 +26,29 @@
         </div>
     </div>
     <div class="card shadow">
+        <div class="col-sm-12" style="background-color: #1b68ff;">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title pt-3 text-white">لیست کاربران</h5>
+                <h5 class="card-title pt-3 text-white">لیست کاربران</h5>
+                <div>
+                    <button id="editButton" hidden="true" type="button" class="btn btn-primary position-relative ml-1"
+                            data-toggle="tooltip" data-placement="top" title="ویرایش">
+                        <i class="fe fe-24 fe-edit-2"></i>
+                        <span style="font-size: 100%;" id="editBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">
+                            0
+                        </span>
+                    </button>
+
+                    <button id="deleteButton" hidden="true" type="button" class="btn btn-primary position-relative" onclick="deleteEvent()"
+                            data-toggle="tooltip" data-placement="top" title="حذف">
+                        <i class="fe fe-24 fe-trash-2" aria-hidden="true"></i>
+                        <span style="font-size: 100%;" id="deleteBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            0
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
         <div class="card-header pb-0">
             <div class="row">
                 <form class="col-sm-12">
@@ -43,28 +66,6 @@
             </div>
         </div>
         <div class="card-body">
-            <div class="col-sm-12" style="background-color: #1b68ff;">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="card-title pt-3 text-white">لیست کاربران</h5>
-                    <div>
-                        <button id="editButton" hidden="true" type="button" class="btn btn-primary position-relative ml-1"
-                                data-toggle="tooltip" data-placement="top" title="ویرایش">
-                            <i class="fe fe-24 fe-edit-2"></i>
-                            <span style="font-size: 100%;" id="editBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">
-                                0
-                            </span>
-                        </button>
-
-                        <button id="deleteButton" hidden="true" type="button" class="btn btn-primary position-relative" onclick="deleteEvent()"
-                                data-toggle="tooltip" data-placement="top" title="حذف">
-                            <i class="fe fe-24 fe-trash-2" aria-hidden="true"></i>
-                            <span style="font-size: 100%;" id="deleteBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                0
-                            </span>
-                        </button>
-                    </div>
-                </div>
-            </div>
             <div class="ag-theme-alpine col-sm-12 p-0" id="myGrid" style="height: 40vh;"></div>
             <br>
             <div class="row justify-content-between">
@@ -116,7 +117,7 @@
             fetchDataFromServer(data);
         });
 
-        var sortOrder = [{keyName: "", keySort: ""}];
+        var sortOrder = [{ keyName: "", keySort: "" }];
         var filterIndex = 0;
         var selectedIds = [];
         var activePage = 1;
@@ -348,7 +349,7 @@
                         keyName: keyNames[j],
                         keyOperator: keyOperators[j],
                         keyType: filters.filter(item => item.name === keyNames[j])[0].type,
-                        keyValue: Array.isArray($("#" + "value" + j).val()) 
+                        keyValue: Array.isArray($("#" + "value" + j).val())
                             ? $("#" + "value" + j).val()
                             : [$("#" + "value" + j).val()]
                     });
@@ -515,10 +516,10 @@
             onSortChanged() {
                 var colState = gridOptions.columnApi.getColumnState();
                 var sortState = colState
-                    .filter(function (s) {
+                    .filter(function(s) {
                         return s.sort != null;
                     })
-                    .map(function (s) {
+                    .map(function(s) {
                         return { keyName: s.colId, keySort: s.sort };
                     });
                 sortOrder = sortState;
