@@ -8,7 +8,7 @@ public interface IUserService
 {
     Task<AdvanceDataTable<UserDataTableDto>> GetDataTable(AdvanceDataTable<UserDataTableDto> data);
 
-    Task<UserUpdateDto> Create(UserCreateDto createDto);
+    Task<OperationResult<UserUpdateDto>> Create(UserCreateDto createDto);
     
     Task<UserUpdateDto> Update(UserUpdateDto updateDto);
 

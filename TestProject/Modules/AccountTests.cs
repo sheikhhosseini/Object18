@@ -13,7 +13,7 @@ using TestProject.Factory;
 using TestProject.MyRandomGenerator;
 using Xunit;
 
-namespace TestProject;
+namespace TestProject.Modules;
 
 [Collection(nameof(AllTestsCollectionFixture))]
 public class AccountTests : DbContextFixture

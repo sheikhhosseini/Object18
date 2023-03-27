@@ -41,4 +41,8 @@
     <ProjectReference Include="..\Ioc\Ioc.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\Images\UserAvatar\" />
+  </ItemGroup>
+
 </Project>

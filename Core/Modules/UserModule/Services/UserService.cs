@@ -53,12 +53,21 @@ public class UserService : IUserService
         return await GeneratePages(data, query);
     }
 
-    public async Task<UserUpdateDto> Create(UserCreateDto createDto)
+    public async Task<OperationResult<UserUpdateDto>> Create(UserCreateDto createDto)
     {
-        var createUser = _mapper.Map<User>(createDto);
-        await _dbContext.AddEntityAsync(createUser);
+        var newUser = _mapper.Map<User>(createDto);
+        string imageName = await FileSaver.CreateImage(createDto.UserImage);
+        newUser.UserImage = imageName;
+
+        await _dbContext.AddEntityAsync(newUser);
         await _dbContext.SaveChangesAsync();
-        return null;
+
+        return new OperationResult<UserUpdateDto>
+        {
+            Message = "کاربر با موفقیت ایجاد شد",
+            Type = OperationResultType.Single,
+            Response = Response.Success
+        };
     }
 
     public async Task<UserUpdateDto> Update(UserUpdateDto updateDto)
