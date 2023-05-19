@@ -1,12 +1,12 @@
-﻿using AutoMapper;
+﻿using System.ComponentModel.DataAnnotations;
+using AutoMapper;
 using Core.Shared.Tools;
 using Data.Models;
 using Microsoft.AspNetCore.Http;
-using System.ComponentModel.DataAnnotations;
 
-namespace Core.Modules.UserModule.Dtos;
+namespace Core.Modules.MemberModule.Dtos;
 
-public class UserCreateDto
+public class MemberCreateDto
 {
     [Display(Name = "نام")]
     [MaxLength(70, ErrorMessage = "تعداد کاراکتر های {0} نمیتواند بیشتر از {1} باشد")]
@@ -24,39 +24,48 @@ public class UserCreateDto
     public string MobileNumber { get; set; }
 
     [Display(Name = "ایمیل")]
-    [Required(ErrorMessage = "لطفا {0} را وارد کنید")]
     [MaxLength(100, ErrorMessage = "تعداد کاراکتر های {0} نمیتواند بیشتر از {1} باشد")]
     [EmailAddress(ErrorMessage = "لطفا {0} معتبر وارد کنید")]
     public string Email { get; set; }
 
-    [Display(Name = "رمز عبور")]
+    [Display(Name = "جنسیت")]
     [Required(ErrorMessage = "لطفا {0} را وارد کنید")]
-    [MaxLength(20, ErrorMessage = "تعداد کاراکتر های {0} نمیتواند بیشتر از {1} باشد")]
-    public string Password { get; set; }
+    public bool Gender { get; set; }
 
-    public string ActiveCode { get; set; }
+    [Display(Name = "کد ملی")]
+    [MaxLength(10, ErrorMessage = "تعداد کاراکتر های {0} نمیتواند بیشتر از {1} باشد")]
+    [Required(ErrorMessage = "لطفا {0} را وارد کنید")]
+    public string KodMeli { get; set; }
 
-    public bool IsActive { get; set; }
+    [Display(Name = "تاریخ تولد")]
+    [MaxLength(10, ErrorMessage = "تعداد کاراکتر های {0} نمیتواند بیشتر از {1} باشد")]
+    [Required(ErrorMessage = "لطفا {0} را وارد کنید")]
+    public string DateOfBirth { get; set; }
 
-    public IFormFile UserImage { get; set; }
+    [Display(Name = "تاریخ ثبت نام")]
+    [MaxLength(10, ErrorMessage = "تعداد کاراکتر های {0} نمیتواند بیشتر از {1} باشد")]
+    [Required(ErrorMessage = "لطفا {0} را وارد کنید")]
+    public string RegisterDate { get; set; }
 
-    public ICollection<UserRoleDto> UserRoles { get; set; }
+    [Display(Name = "آدرس")]
+    [MaxLength(400, ErrorMessage = "تعداد کاراکتر های {0} نمیتواند بیشتر از {1} باشد")]
+    public string Address { get; set; }
+
+    public IFormFile Image { get; set; }
 }
 
-public class UserCreateDtoProfile : Profile
+public class MemberCreateDtoProfile : Profile
 {
-    public UserCreateDtoProfile()
+    public MemberCreateDtoProfile()
     {
-        CreateMap<UserCreateDto, User>(MemberList.Destination)
-            .ForMember(model => model.UserImage, opt =>
+        CreateMap<MemberCreateDto, Member>(MemberList.Destination)
+            .ForMember(model => model.Image, opt =>
                 opt.Ignore())
             .ForMember(model => model.FirstName, opt =>
                 opt.MapFrom(dto => dto.FirstName.SanitizeText()))
             .ForMember(model => model.LastName, opt =>
                 opt.MapFrom(dto => dto.LastName.SanitizeText()))
             .ForMember(model => model.Email, opt =>
-                opt.MapFrom(dto => dto.Email.SanitizeText()))
-            .ForMember(model => model.Password, opt =>
-                opt.MapFrom(dto => dto.Password.EncodePasswordMd5()));
+                opt.MapFrom(dto => dto.Email.SanitizeText()));
     }
 }

@@ -1,5 +1,5 @@
-﻿using Core.Modules.UserModule.Dtos;
-using Core.Modules.UserModule.Services;
+﻿using Core.Modules.MemberModule.Dtos;
+using Core.Modules.MemberModule.Services;
 using Core.Shared.Paging;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -7,16 +7,16 @@ using Newtonsoft.Json;
 namespace Object18.Areas.Admin.Controllers;
 
 [Area("Admin")]
-public class UserController : Controller
+public class MemberController : Controller
 {
-    private readonly IUserService _userService;
+    private readonly IMemberService _userService;
 
-    public UserController(IUserService userService)
+    public MemberController(IMemberService userService)
     {
         _userService = userService;
     }
 
-    // GET: UserController
+    // GET: MemberController
     public ActionResult Index()
     {
         return View();
@@ -44,7 +44,7 @@ public class UserController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<ActionResult> GridAjax([FromBody] AdvanceDataTable<UserDataTableDto> data)
+    public async Task<ActionResult> GridAjax([FromBody] AdvanceDataTable<MemberDataTableDto> data)
     {
         var result = await _userService.GetDataTable(data);
         return new JsonResult(result);
@@ -67,13 +67,13 @@ public class UserController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(UserCreateDto input)
+    public async Task<IActionResult> Create(MemberCreateDto input)
     {
         if (ModelState.IsValid)
         {
-            //long uId = await _userAdminPanelService.AddUserFromAdmin(data);
-            //await _roleService.AddRolesForUser(data.PostSelectedRoles, uId);
-            //TempData["alert"] = "insertUserInfoDone";
+            //long uId = await _userAdminPanelService.AddMemberFromAdmin(data);
+            //await _roleService.AddRolesForMember(data.PostSelectedRoles, uId);
+            //TempData["alert"] = "insertMemberInfoDone";
             return RedirectToAction(nameof(Index));
         }
 
@@ -85,13 +85,13 @@ public class UserController : Controller
 
 
 
-    // GET: UserController/Create
+    // GET: MemberController/Create
     public ActionResult Create()
     {
         return View();
     }
 
-    // POST: UserController/Create
+    // POST: MemberController/Create
     //[HttpPost]
     //[ValidateAntiForgeryToken]
     //public ActionResult Create(IFormCollection collection)
@@ -106,13 +106,13 @@ public class UserController : Controller
     //    }
     //}
 
-    // GET: UserController/Edit/5
+    // GET: MemberController/Edit/5
     public ActionResult Edit(int id)
     {
         return View();
     }
 
-    // POST: UserController/Edit/5
+    // POST: MemberController/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
     public ActionResult Edit(int id, IFormCollection collection)
@@ -126,10 +126,4 @@ public class UserController : Controller
             return View();
         }
     }
-}
-
-public class Sample
-{
-    public int Id { get; set; }
-    public string Text { get; set; }
 }
