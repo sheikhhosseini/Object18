@@ -7,6 +7,7 @@ using Data.Models;
 using Gridify;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
+using Core.Shared.DataTable;
 
 namespace Core.Modules.MemberModule.Services;
 
@@ -14,44 +15,24 @@ public class MemberService : IMemberService
 {
     private readonly MainDbContext _dbContext;
     private readonly IMapper _mapper;
+    private readonly IDataTableService _dataTable;
 
-    public MemberService(MainDbContext dbContext, IMapper mapper)
+    public MemberService(
+        MainDbContext dbContext,
+        IMapper mapper,
+        IDataTableService dataTable
+    )
     {
         _dbContext = dbContext;
         _mapper = mapper;
+        _dataTable = dataTable;
     }
 
     public async Task<AdvanceDataTable<MemberDataTableDto>> GetDataTable(
         AdvanceDataTable<MemberDataTableDto> data
     )
     {
-        var query = _dbContext.GetEntitiesAsNoTrackingQuery<Member>();
-
-        foreach (var filter in data.Filters)
-        {
-            if (filter.KeyType is "text" or "number" && !string.IsNullOrEmpty(filter.KeyValue.First()))
-            {
-                query = query.ApplyFiltering($"{filter.KeyName} {filter.KeyOperator} {filter.KeyValue.First()}");
-            }
-            else if (filter.KeyType == "date" && !string.IsNullOrEmpty(filter.KeyValue.First()))
-            {
-                query = query.Where("string.Compare(" + filter.KeyName + ", @0)" + filter.KeyOperator + "0", filter.KeyValue.First());
-            }
-            else if (filter.KeyType == "list")
-            {
-
-            }
-        }
-
-        foreach (var sortOrder in data.SortOrder)
-        {
-            if (!string.IsNullOrEmpty(sortOrder.KeyName) && !string.IsNullOrEmpty(sortOrder.KeySort))
-            {
-                query = query.ApplyOrdering($"{sortOrder.KeyName} {sortOrder.KeySort}");
-            }
-        }
-
-        return await GeneratePages(data, query);
+        return await _dataTable.GetDataTable(_dbContext.GetEntitiesAsNoTrackingQuery<Member>(), data);
     }
 
     public async Task<OperationResult<MemberUpdateDto>> Create(MemberCreateDto createDto)
@@ -121,38 +102,5 @@ public class MemberService : IMemberService
             Response = Response.Success,
             Message = $"'{users.Count}' کاربر با موفقیت حذف شد",
         };
-    }
-
-    private async Task<AdvanceDataTable<MemberDataTableDto>> GeneratePages(
-        AdvanceDataTable<MemberDataTableDto> data,
-        IQueryable<Member> query
-    )
-    {
-
-        var pageCount = (int)Math.Ceiling(query.Count() / (double)data.TakeEntity);
-        var pager = PageGenerator.Generate(pageCount, data.PageId, data.TakeEntity);
-        var users = await query.Paging(pager).ToListAsync();
-
-        var records = _mapper.Map<List<MemberDataTableDto>>(users);
-
-        var rowNumber = pager.SkipEntity;
-        foreach (var record in records)
-        {
-            record.Row = ++rowNumber;
-        }
-
-        var result = new AdvanceDataTable<MemberDataTableDto>
-        {
-            Records = records,
-            PageId = pager.PageId,
-            PageCount = pager.PageCount,
-            StartPage = pager.StartPage,
-            EndPage = pager.EndPage,
-            TakeEntity = pager.TakeEntity,
-            SkipEntity = pager.SkipEntity,
-            ActivePage = pager.ActivePage,
-        };
-
-        return result;
     }
 }

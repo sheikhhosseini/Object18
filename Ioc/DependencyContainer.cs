@@ -2,6 +2,7 @@
 using Core.Modules.AccountModule.Services;
 using Core.Modules.MemberModule.Services;
 using Core.Modules.UserModule.Services;
+using Core.Shared.DataTable;
 using Microsoft.Extensions.DependencyInjection;
 using Core.Shared.Email;
 
@@ -23,5 +24,7 @@ public class DependencyContainer
         #region AutoMapper Configs
         service.AddAutoMapper(typeof(AccountProfile));
         #endregion
+
+        service.AddScoped<IDataTableService, DataTableService>();
     }
 }

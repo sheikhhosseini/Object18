@@ -1,11 +1,12 @@
 ﻿using AutoMapper;
+using Core.Shared.DataTable;
 using Data.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Xml.Linq;
 
 namespace Core.Modules.MemberModule.Dtos;
 
-public class MemberDataTableDto
+public class MemberDataTableDto : DataTableBaseDto
 {
     public long Id { get; set; }
 
@@ -27,7 +28,6 @@ public class MemberDataTableDto
 
     public string Address { get; set; }
 
-    public int Row { get; set; }
 }
 
 public class MemberDataTableDtoProfile : Profile
