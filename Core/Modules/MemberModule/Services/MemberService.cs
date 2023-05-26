@@ -6,6 +6,7 @@ using Data.Context;
 using Data.Models;
 using Gridify;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Dynamic.Core;
 
 namespace Core.Modules.MemberModule.Services;
 
@@ -28,13 +29,13 @@ public class MemberService : IMemberService
 
         foreach (var filter in data.Filters)
         {
-            if (filter.KeyType == "text")
+            if (filter.KeyType is "text" or "number" && !string.IsNullOrEmpty(filter.KeyValue.First()))
             {
                 query = query.ApplyFiltering($"{filter.KeyName} {filter.KeyOperator} {filter.KeyValue.First()}");
             }
-            else if (filter.KeyType == "number")
+            else if (filter.KeyType == "date" && !string.IsNullOrEmpty(filter.KeyValue.First()))
             {
-                query = query.ApplyFiltering($"{filter.KeyName} {filter.KeyOperator} {filter.KeyValue.First()}");
+                query = query.Where("string.Compare(" + filter.KeyName + ", @0)" + filter.KeyOperator + "0", filter.KeyValue.First());
             }
             else if (filter.KeyType == "list")
             {
@@ -64,7 +65,7 @@ public class MemberService : IMemberService
 
         return new OperationResult<MemberUpdateDto>
         {
-            Message = "کاربر با موفقیت ایجاد شد",
+            Message = "عضو جدید با موفقیت ایجاد شد",
             Type = OperationResultType.Single,
             Response = Response.Success
         };

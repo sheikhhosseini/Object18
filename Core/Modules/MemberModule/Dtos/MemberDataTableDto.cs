@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using Data.Models;
+using System.ComponentModel.DataAnnotations;
+using System.Xml.Linq;
 
 namespace Core.Modules.MemberModule.Dtos;
 
@@ -15,8 +17,16 @@ public class MemberDataTableDto
 
     public string Email { get; set; }
 
-    public bool IsActive { get; set; }
-    
+    public string KodMeli { get; set; }
+
+    public string DateOfBirth { get; set; }
+
+    public string RegisterDate { get; set; }
+
+    public bool Gender { get; set; }
+
+    public string Address { get; set; }
+
     public int Row { get; set; }
 }
 

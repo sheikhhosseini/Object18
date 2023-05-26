@@ -120,37 +120,6 @@
             fetchDataFromServer(data);
         });
 
-        var sortOrder = [{ keyName: "", keySort: "" }];
-        var filterIndex = 0;
-        var selectedIds = [];
-        var activePage = 1;
-
-        var filterOperators = [
-            {
-                name: "شامل میشود",
-                value: "=*"
-            },
-            {
-                name: "شامل نمیشود",
-                value: "!*"
-            },
-            {
-                name: "برابر با",
-                value: "="
-            },
-            {
-                name: "نابرابر با",
-                value: "!*"
-            },
-            {
-                name: "بزرگتر از",
-                value: ">"
-            },
-            {
-                name: "کوچکتر از",
-                value: "<"
-            }
-        ];
         var filters = [
             {
                 name: "firstName",
@@ -171,311 +140,50 @@
                 value: ""
             },
             {
-                name: "email",
-                label: "ایمیل",
-                type: "list",
-                value: "",
-                dataSourceUrl: 'https://@Context.Request.Host/Admin/User/Test1'
-            }
+                name: "KodMeli",
+                label: "کد ملی",
+                type: "number",
+                value: ""
+            },
+            {
+                name: "DateOfBirth",
+                label: "تاریخ تولد",
+                type: "date",
+                value: ""
+            },
+            {
+                name: "RegisterDate",
+                label: "تاریخ ثبت نام",
+                type: "date",
+                value: ""
+            },
+            //{
+            //    name: "Email",
+            //    label: "ایمیل",
+            //    type: "text",
+            //    value: ""
+            //},
+            //{
+            //    name: "Gender",
+            //    label: "جنسیت",
+            //    type: "text",
+            //    value: ""
+            //},
+            //{
+            //    name: "Address",
+            //    label: "آدرس",
+            //    type: "text",
+            //    value: ""
+            //},
+            //{
+            //    name: "email",
+            //    label: "ایمیل",
+            //    type: "list",
+            //    value: "",
+            //    dataSourceUrl: 'https://@Context.Request.Host/Admin/User/Test1'
+            //}
         ];
 
-        function generateFilter() {
-            var result = '';
-            var keyNameOptions = '';
-            var keyOperatorOptions = '';
-
-            for (var i = 0; i < filters.length; i++) {
-                keyNameOptions += '<option ' +
-                    'value="' +
-                    filters[i].name +
-                    '">' +
-                    filters[i].label +
-                    '</option>';
-
-                keyOperatorOptions += '<option ' +
-                    'value="' +
-                    filterOperators[i].value +
-                    '">' +
-                    filterOperators[i].name +
-                    '</option>';
-            }
-            result += '<div class="col-sm-2 mb-2">' +
-                '<select id="' +
-                filterIndex +
-                '" name="keyName" class="form-control" onchange="onKeyNameChange(this)">' +
-                keyNameOptions +
-                '</select>' +
-                '</div>';
-
-            result += '<div class="col-sm-2 mb-2">' +
-                '<select id="operator' +
-                filterIndex +
-                '" name="keyOperator" class="form-control ">' +
-                keyOperatorOptions +
-                '</select>' +
-                '</div>';
-
-            result += '<div class="col-sm-2 mb-2">' +
-                '<input id="value' +
-                filterIndex +
-                '" name="keyValue" type="text" class="form-control">' +
-                '</div>';
-            filterIndex++;
-            $(result).appendTo('#advancedSearch');
-        }
-
-        function onKeyNameChange(input) {
-            var selectedKeyName = input.value;
-
-            var selectedFilterType = filters.find(x => x.name === selectedKeyName).type;
-            var operatorId = "operator" + input.id;
-            var $el = $("#" + operatorId);
-            $el.empty();
-
-            var $inputValue = $("#" + "value" + input.id);
-
-            const textTypeOperators = [
-                {
-                    name: "شامل میشود",
-                    value: "=*"
-                },
-                {
-                    name: "شامل نمیشود",
-                    value: "!*"
-                },
-                {
-                    name: "برابر با",
-                    value: "="
-                },
-                {
-                    name: "نابرابر با",
-                    value: "!*"
-                }
-            ];
-
-            const numberTypeOperators = [
-                {
-                    name: "برابر با",
-                    value: "="
-                },
-                {
-                    name: "نابرابر با",
-                    value: "!*"
-                },
-                {
-                    name: "بزرگتر از",
-                    value: ">"
-                },
-                {
-                    name: "کوچکتر از",
-                    value: "<"
-                }
-            ];
-
-            const listTypeOperators = [
-                {
-                    name: "شامل میشود",
-                    value: "=*"
-                },
-                {
-                    name: "شامل نمیشود",
-                    value: "!*"
-                }
-            ];
-
-            if (selectedFilterType === "text") {
-                $.each(textTypeOperators,
-                    function(key, value) {
-                        $el.append($("<option></option>")
-                            .attr("value", value.value).text(textTypeOperators[key].name));
-                    });
-                $inputValue.attr('type', 'text');
-            } else if (selectedFilterType === "number") {
-                $.each(numberTypeOperators,
-                    function(key, value) {
-                        $el.append($("<option></option>")
-                            .attr("value", value.value).text(numberTypeOperators[key].name));
-                    });
-                $inputValue.attr('type', 'number');
-            } else if (selectedFilterType === "list") {
-                $.each(listTypeOperators,
-                    function(key, value) {
-                        $el.append($("<option></option>")
-                            .attr("value", value.value).text(listTypeOperators[key].name));
-                    });
-
-                var select = '';
-                select =
-                    '<select id="value' + input.id + '" class="js-example-basic-single col-sm-12" name="keyValue" multiple="multiple">'
-
-                    + '</select>';
-
-                $inputValue.replaceWith(select);
-
-                var selectedFilterDataSourceUrl = filters.find(x => x.name === selectedKeyName).dataSourceUrl;
-
-                $('.js-example-basic-single').select2({
-                    ajax: {
-                        headers: {
-                            RequestVerificationToken: $(".AntiForge" + " input").val()
-                        },
-                        type: "POST",
-                        dataType: "json",
-                        url: selectedFilterDataSourceUrl,
-                        contentType: "application/json",
-                        data: JSON.stringify('ss'),
-                        processResults: function(data) {
-                            return {
-                                results: data
-                            };
-                        }
-                    }
-                });
-            };
-        }
-
-        function GetFilterData() {
-            var formResult = $('form').serializeArray();
-            var keyNames = [];
-            var keyOperators = [];
-
-            keyNames = formResult.filter(form => form.name === "keyName")
-                .map(form => form.value);
-            keyOperators = formResult.filter(form => form.name === "keyOperator")
-                .map(form => form.value);
-
-            var finalData = [];
-
-            for (var j = 0; j < keyNames.length; j++) {
-                finalData.push(
-                    {
-                        keyName: keyNames[j],
-                        keyOperator: keyOperators[j],
-                        keyType: filters.filter(item => item.name === keyNames[j])[0].type,
-                        keyValue: Array.isArray($("#" + "value" + j).val())
-                            ? $("#" + "value" + j).val()
-                            : [$("#" + "value" + j).val()]
-                    });
-            }
-            return finalData;
-        }
-
-        function refresh() {
-            $('form').trigger('reset');
-            $('select[name="sortOrder"]').prop('selectedIndex', 0);
-            $('select[name="takeEntity"]').prop('selectedIndex', 1);
-
-            var data = {
-                filters: GetFilterData(),
-                sortOrder: sortOrder,
-                takeEntity: $('select[name="takeEntity"]').val()
-            };
-            fetchDataFromServer(data);
-        }
-
-        function onPageClick(input) {
-            var pageId;
-
-            if (input === "next") {
-                pageId = activePage + 1;
-            } else if (input === "previous") {
-                pageId = activePage - 1;
-            } else {
-                pageId = input;
-            }
-
-            var data = {
-                filters: GetFilterData(),
-                sortOrder: sortOrder,
-                takeEntity: $('select[name="takeEntity"]').val(),
-                pageId: pageId
-            };
-            fetchDataFromServer(data);
-        }
-
-        function search() {
-            var data = {
-                filters: GetFilterData(),
-                sortOrder: sortOrder,
-                takeEntity: $('select[name="takeEntity"]').val()
-            };
-            fetchDataFromServer(data);
-        }
-
-        function deleteEvent() {
-            var swalWithBootstrapButtons = Swal.mixin({
-                customClass: {
-                    confirmButton: 'btn btn-success m-1',
-                    cancelButton: 'btn btn-danger m-1'
-                },
-                buttonsStyling: false
-            });
-            swalWithBootstrapButtons.fire({
-                title: 'آیا میخواهید کاربر را حذف کنید؟',
-                text: "این عملیات غیر قابل بازگشت است!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'حذف کاربر',
-                cancelButtonText: 'انصراف',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        headers: {
-                            RequestVerificationToken: $(".AntiForge" + " input").val()
-                        },
-                        type: 'POST',
-                        url: 'https://@Context.Request.Host/Admin/User/Delete',
-                        data: JSON.stringify(selectedIds),
-                        dataType: "json",
-                        contentType: "application/json",
-                        success: function(result) {
-                            if (result.response === 0) {
-                                Toastify({
-                                    text: result.message,
-                                    duration: 5000,
-                                    close: true,
-                                    gravity: "top",
-                                    position: "center",
-                                    backgroundColor: "#4fbe87"
-                                }).showToast();
-                            }
-                            if (result.response === 1) {
-                                Toastify({
-                                    text: result.message,
-                                    duration: 5000,
-                                    close: true,
-                                    gravity: "top",
-                                    position: "center",
-                                    backgroundColor: "#eb811e"
-                                }).showToast();
-                            }
-                            if (result.response === 2) {
-                                Toastify({
-                                    text: result.message,
-                                    duration: 5000,
-                                    close: true,
-                                    gravity: "top",
-                                    position: "center",
-                                    backgroundColor: "#f0210e"
-                                }).showToast();
-                            }
-                        },
-                        error: function() {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'سمت سرور خطا رخ داده است',
-                                confirmButtonText: 'تایید',
-                                timer: 3000
-                            });
-                        }
-                    });
-                }
-            });
-            return false;
-        }
-
-        // Grid Options
         const columnDefs = [
             {
                 headerName: 'ردیف',
@@ -500,8 +208,33 @@
                 width: 150
             },
             {
+                headerName: 'کد ملی',
+                field: "kodMeli",
+                width: 150
+            },
+            {
+                headerName: 'تاریخ تولد',
+                field: "dateOfBirth",
+                width: 150
+            },
+            {
+                headerName: 'تاریخ ثبت نام',
+                field: "registerDate",
+                width: 150
+            },
+            {
                 headerName: 'ایمیل',
                 field: "email",
+                width: 150
+            },
+            {
+                headerName: 'جنسیت',
+                field: "Gender",
+                width: 150
+            },
+            {
+                headerName: 'آدرس',
+                field: "address",
                 width: 150
             }
         ];
@@ -547,48 +280,80 @@
         };
         const eGridDiv = document.getElementById("myGrid");
         new agGrid.Grid(eGridDiv, gridOptions);
+        const AjaxUrl = 'https://@Context.Request.Host/Admin/Member/GridAjax';
 
-        function fetchDataFromServer(data) {
-            $.ajax({
-                headers: {
-                    RequestVerificationToken: $(".AntiForge" + " input").val()
+        function deleteEvent() {
+            var swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: 'btn btn-success m-1',
+                    cancelButton: 'btn btn-danger m-1'
                 },
-                type: "POST",
-                dataType: "json",
-                url: 'https://@Context.Request.Host/Admin/User/GridAjax',
-                contentType: "application/json",
-                data: JSON.stringify(data),
-                success: function(result) {
-                    gridOptions.api.setRowData(result.records);
-                    activePage = result.activePage;
-
-                    if (result.activePage === 1) {
-                        $('#previous').addClass('disabled');
-                    } else {
-                        $('#previous').removeClass('disabled');
-                    }
-
-                    if (result.activePage === result.endPage) {
-                        $('#next').addClass('disabled');
-                    } else {
-                        $('#next').removeClass('disabled');
-                    }
-
-                    $('.pages').remove();
-                    var pagination = '';
-                    for (var i = result.startPage; i <= result.endPage; i++) {
-                        if (i === result.activePage) {
-                            pagination += '<li class="page-item pages active"><button class="page-link">' + i + '</button></li>';
-                        } else {
-                            pagination += '<li class="page-item pages"><button class="page-link" onclick="onPageClick(' + i + ')" >' + i + '</button></li>';
+                buttonsStyling: false
+            });
+            swalWithBootstrapButtons.fire({
+                title: 'آیا میخواهید کاربر را حذف کنید؟',
+                text: "این عملیات غیر قابل بازگشت است!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'حذف کاربر',
+                cancelButtonText: 'انصراف',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        headers: {
+                            RequestVerificationToken: $(".AntiForge" + " input").val()
+                        },
+                        type: 'POST',
+                        url: 'https://@Context.Request.Host/Admin/User/Delete',
+                        data: JSON.stringify(selectedIds),
+                        dataType: "json",
+                        contentType: "application/json",
+                        success: function (result) {
+                            if (result.response === 0) {
+                                Toastify({
+                                    text: result.message,
+                                    duration: 5000,
+                                    close: true,
+                                    gravity: "top",
+                                    position: "center",
+                                    backgroundColor: "#4fbe87"
+                                }).showToast();
+                            }
+                            if (result.response === 1) {
+                                Toastify({
+                                    text: result.message,
+                                    duration: 5000,
+                                    close: true,
+                                    gravity: "top",
+                                    position: "center",
+                                    backgroundColor: "#eb811e"
+                                }).showToast();
+                            }
+                            if (result.response === 2) {
+                                Toastify({
+                                    text: result.message,
+                                    duration: 5000,
+                                    close: true,
+                                    gravity: "top",
+                                    position: "center",
+                                    backgroundColor: "#f0210e"
+                                }).showToast();
+                            }
+                        },
+                        error: function () {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'سمت سرور خطا رخ داده است',
+                                confirmButtonText: 'تایید',
+                                timer: 3000
+                            });
                         }
-                    }
-                    $('#previous').after(pagination);
-                },
-                error: function(e) {
-                    console.log(e.responseText);
+                    });
                 }
             });
+            return false;
         }
+
     </script>
 }

@@ -1,6 +1,7 @@
 ﻿using Core.Modules.MemberModule.Dtos;
 using Core.Modules.MemberModule.Services;
 using Core.Shared.Paging;
+using Core.Shared.Tools;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
@@ -9,11 +10,11 @@ namespace Object18.Areas.Admin.Controllers;
 [Area("Admin")]
 public class MemberController : Controller
 {
-    private readonly IMemberService _userService;
+    private readonly IMemberService _memberService;
 
-    public MemberController(IMemberService userService)
+    public MemberController(IMemberService memberService)
     {
-        _userService = userService;
+        _memberService = memberService;
     }
 
     // GET: MemberController
@@ -46,7 +47,7 @@ public class MemberController : Controller
     [ValidateAntiForgeryToken]
     public async Task<ActionResult> GridAjax([FromBody] AdvanceDataTable<MemberDataTableDto> data)
     {
-        var result = await _userService.GetDataTable(data);
+        var result = await _memberService.GetDataTable(data);
         return new JsonResult(result);
     }
 
@@ -54,7 +55,7 @@ public class MemberController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete([FromBody] List<long> ids)
     {
-        return Json(await _userService.Delete(ids));
+        return Json(await _memberService.Delete(ids));
     }
 
 
@@ -71,13 +72,17 @@ public class MemberController : Controller
     {
         if (ModelState.IsValid)
         {
-            //long uId = await _userAdminPanelService.AddMemberFromAdmin(data);
-            //await _roleService.AddRolesForMember(data.PostSelectedRoles, uId);
-            //TempData["alert"] = "insertMemberInfoDone";
-            return RedirectToAction(nameof(Index));
+            var result = await _memberService.Create(input);
+            if (result.Response == Core.Shared.Tools.Response.Success)
+            {
+                TempData["alert"] = "insertMemberDone";
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                
+            }
         }
-
-        var a = ModelState.ErrorCount;
 
         return View(input);
     }
