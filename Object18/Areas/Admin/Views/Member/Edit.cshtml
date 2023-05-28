@@ -1,4 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Core.Shared.Tools
 @model Core.Modules.MemberModule.Dtos.MemberUpdateDto
 
 
@@ -108,6 +109,22 @@
 </div>
 
 @section Scripts {
+    @if (TempData["Response"] != null && (Response)TempData["Response"] == Response.Failed)
+    {
+        <script type="text/javascript">
+            Swal.fire({
+                icon: 'error',
+                title: '@TempData["AlertMessage"]',
+                confirmButtonText: 'تایید',
+                timer: 3000
+            });
+        </script>
+
+        TempData.Remove("Response");
+        TempData.Remove("AlertMessage");
+    }
+    
+
     <script type="text/javascript">
         $(document).ready(function () {
             $("#DateOfBirth").persianDatepicker({
@@ -124,23 +141,5 @@
                 formatDate: "YYYY/0M/0D"
             });
         });
-        
-        (function () {
-            'use strict';
-            window.addEventListener('load', function () {
-                // Fetch all the forms we want to apply custom Bootstrap validation styles to
-                var forms = document.getElementsByClassName('needs-validation');
-                // Loop over them and prevent submission
-                var validation = Array.prototype.filter.call(forms, function (form) {
-                    form.addEventListener('submit', function (event) {
-                        if (form.checkValidity() === false) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        }
-                        form.classList.add('was-validated');
-                    }, false);
-                });
-            }, false);
-        })();
     </script>
 }

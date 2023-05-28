@@ -1,4 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Core.Shared.Tools
 @model Core.Modules.MemberModule.Dtos.MemberCreateDto
 
 
@@ -72,7 +73,7 @@
                             <div class="form-row pt-1">
                                 <div class="col-md-6">
                                     <div class="custom-control custom-radio">
-                                        <input type="radio" class="custom-control-input" asp-for="Gender" id="man" value="true" required="true">
+                                        <input type="radio" class="custom-control-input" asp-for="Gender" id="man" value="true" required="true" checked>
                                         <label for="man" class="custom-control-label">مرد</label>
                                     </div>
                                 </div>
@@ -107,6 +108,21 @@
 </div>
 
 @section Scripts {
+    @if (TempData["Response"] != null && (Response)TempData["Response"] == Response.Failed)
+    {
+        <script type="text/javascript">
+            Swal.fire({
+                icon: 'error',
+                title: '@TempData["AlertMessage"]',
+                confirmButtonText: 'تایید',
+                timer: 3000
+            });
+        </script>
+
+        TempData.Remove("Response");
+        TempData.Remove("AlertMessage");
+    }
+
     <script type="text/javascript">
         $(document).ready(function () {
             $("#DateOfBirth").persianDatepicker({

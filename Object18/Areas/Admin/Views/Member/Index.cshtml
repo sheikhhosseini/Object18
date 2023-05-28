@@ -310,11 +310,11 @@
                 buttonsStyling: false
             });
             swalWithBootstrapButtons.fire({
-                title: 'آیا میخواهید کاربر را حذف کنید؟',
+                title: 'آیا میخواهید عضو را حذف کنید؟',
                 text: "این عملیات غیر قابل بازگشت است!",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'حذف کاربر',
+                confirmButtonText: 'حذف عضو',
                 cancelButtonText: 'انصراف',
                 reverseButtons: true
             }).then((result) => {
@@ -324,7 +324,7 @@
                             RequestVerificationToken: $(".AntiForge" + " input").val()
                         },
                         type: 'POST',
-                        url: 'https://@Context.Request.Host/Admin/User/Delete',
+                        url: 'https://@Context.Request.Host/Admin/Member/Delete',
                         data: JSON.stringify(selectedIds),
                         dataType: "json",
                         contentType: "application/json",

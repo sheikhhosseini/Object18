@@ -58,24 +58,21 @@ public class MemberController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(MemberCreateDto input)
+    public async Task<IActionResult> Create(MemberCreateDto createDto)
     {
-        if (ModelState.IsValid)
+        if (!ModelState.IsValid) return View(createDto);
+
+        var result = await _memberService.Create(createDto);
+
+        TempData["Response"] = result.Response;
+        TempData["AlertMessage"] = result.Message;
+
+        if (result.Response == Core.Shared.Tools.Response.Success)
         {
-            var result = await _memberService.Create(input);
-            if (result.Response == Core.Shared.Tools.Response.Success)
-            {
-                TempData["Response"] = result.Response;
-                TempData["AlertMessage"] = result.Message;
-                return RedirectToAction(nameof(Index));
-            }
-            else
-            {
-                
-            }
+            return RedirectToAction(nameof(Index));
         }
 
-        return View(input);
+        return View(createDto);
     }
 
 
@@ -93,19 +90,15 @@ public class MemberController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(MemberUpdateDto updateDto)
     {
-        if (ModelState.IsValid)
-        {
-            var result = await _memberService.Update(updateDto);
-            if (result.Response == Core.Shared.Tools.Response.Success)
-            {
-                TempData["Response"] = result.Response;
-                TempData["AlertMessage"] = result.Message;
-                return RedirectToAction(nameof(Index));
-            }
-            else
-            {
+        if (!ModelState.IsValid) return View(updateDto);
 
-            }
+        var result = await _memberService.Update(updateDto);
+
+        TempData["Response"] = result.Response;
+        TempData["AlertMessage"] = result.Message;
+
+        if (result.Response == Core.Shared.Tools.Response.Success)
+        {
             return RedirectToAction(nameof(Index));
         }
 

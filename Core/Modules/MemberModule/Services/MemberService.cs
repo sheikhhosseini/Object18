@@ -36,6 +36,26 @@ public class MemberService : IMemberService
 
     public async Task<OperationResult<MemberUpdateDto>> Create(MemberCreateDto createDto)
     {
+        if (await IsKodMeliDuplicate(null, createDto.KodMeli))
+        {
+            return new OperationResult<MemberUpdateDto>
+            {
+                Type = OperationResultType.Single,
+                Response = Response.Failed,
+                Message = "کد ملی تکراری است."
+            };
+        }
+
+        if (await IsMobileNumberDuplicate(null, createDto.MobileNumber))
+        {
+            return new OperationResult<MemberUpdateDto>
+            {
+                Type = OperationResultType.Single,
+                Response = Response.Failed,
+                Message = "شماره تلفن تکراری است."
+            };
+        }
+
         var newMember = _mapper.Map<Member>(createDto);
         string imageName = await FileSaver.CreateImage(createDto.Image);
         newMember.Image = imageName;
@@ -53,6 +73,26 @@ public class MemberService : IMemberService
 
     public async Task<OperationResult<MemberUpdateDto>> Update(MemberUpdateDto updateDto)
     {
+        if (await IsKodMeliDuplicate(updateDto.Id, updateDto.KodMeli))
+        {
+            return new OperationResult<MemberUpdateDto>
+            {
+                Type = OperationResultType.Single,
+                Response = Response.Failed,
+                Message = "کد ملی تکراری است."
+            };
+        }
+
+        if (await IsMobileNumberDuplicate(updateDto.Id, updateDto.MobileNumber))
+        {
+            return new OperationResult<MemberUpdateDto>
+            {
+                Type = OperationResultType.Single,
+                Response = Response.Failed,
+                Message = "شماره تلفن تکراری است."
+            };
+        }
+
         var existingMember = await _dbContext.GetEntitiesQuery<Member>()
             .Where(u => u.Id == updateDto.Id)
             .SingleOrDefaultAsync();
@@ -97,5 +137,17 @@ public class MemberService : IMemberService
             Response = Response.Success,
             Message = $"'{users.Count}' کاربر با موفقیت حذف شد",
         };
+    }
+
+    public async Task<bool> IsKodMeliDuplicate(long? id, string kodMeli)
+    {
+        return await _dbContext.Members.AsNoTracking()
+            .AnyAsync(member => member.Id != id && member.KodMeli == kodMeli);
+    }
+
+    public async Task<bool> IsMobileNumberDuplicate(long? id, string mobileNumber)
+    {
+        return await _dbContext.Members.AsNoTracking()
+            .AnyAsync(member => member.Id != id && member.MobileNumber == mobileNumber);
     }
 }
