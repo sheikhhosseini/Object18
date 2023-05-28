@@ -1,12 +1,11 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Core.Modules.MemberModule.Dtos;
 using Core.Shared.Paging;
 using Core.Shared.Tools;
 using Data.Context;
 using Data.Models;
-using Gridify;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Dynamic.Core;
 using Core.Shared.DataTable;
 
 namespace Core.Modules.MemberModule.Services;
@@ -52,10 +51,10 @@ public class MemberService : IMemberService
         };
     }
 
-    public async Task<MemberUpdateDto> Update(MemberUpdateDto updateDto)
+    public async Task<OperationResult<MemberUpdateDto>> Update(MemberUpdateDto updateDto)
     {
         var existingMember = await _dbContext.GetEntitiesQuery<Member>()
-            .Where(u => u.Id == 1)
+            .Where(u => u.Id == updateDto.Id)
             .SingleOrDefaultAsync();
 
         _mapper.Map(updateDto, existingMember);
@@ -63,24 +62,20 @@ public class MemberService : IMemberService
         _dbContext.UpdateEntityAsync(existingMember);
         await _dbContext.SaveChangesAsync();
 
-        var x = new OperationResult<MemberUpdateDto>
+        return new OperationResult<MemberUpdateDto>
         {
             Type = OperationResultType.Single,
             Response = Response.Success,
-            Message = "",
-            Record = new MemberUpdateDto()
+            Message = "عضو با موفقیت ویرایش شد"
         };
-        
-        return null;
     }
 
     public async Task<MemberUpdateDto> Get(long id)
     {
-        var existingMember = await _dbContext.GetEntitiesQuery<Member>()
+        return await _dbContext.GetEntitiesQuery<Member>()
             .Where(u => u.Id == id)
+            .ProjectTo<MemberUpdateDto>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();
-
-        return _mapper.Map<MemberUpdateDto>(existingMember);
     }
 
     public async Task<OperationResult<MemberUpdateDto>> Delete(List<long> deleteDtos)

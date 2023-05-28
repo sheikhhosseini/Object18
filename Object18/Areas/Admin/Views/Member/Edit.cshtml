@@ -1,9 +1,9 @@
 ﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
-@model Core.Modules.MemberModule.Dtos.MemberCreateDto
+@model Core.Modules.MemberModule.Dtos.MemberUpdateDto
 
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Edit";
 }
 
 <div class="page-heading">
@@ -26,8 +26,9 @@
         </div>
         <div class="card-body">
             <div class="col-sm-12">
-                <form method="post" asp-area="Admin" asp-controller="Member" asp-action="Create" enctype="multipart/form-data">
+                <form method="post" asp-area="Admin" asp-controller="Member" asp-action="Edit" enctype="multipart/form-data">
                     <div class="row">
+                        <input type="hidden" asp-for="Id" />
                         <div class="col-md-4">
                             <label asp-for="FirstName">نام</label>
                             <input asp-for="FirstName" class="form-control">

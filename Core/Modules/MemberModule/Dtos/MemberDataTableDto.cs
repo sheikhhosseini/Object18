@@ -1,8 +1,6 @@
 ﻿using AutoMapper;
 using Core.Shared.DataTable;
 using Data.Models;
-using System.ComponentModel.DataAnnotations;
-using System.Xml.Linq;
 
 namespace Core.Modules.MemberModule.Dtos;
 

@@ -1,4 +1,6 @@
-﻿@{
+﻿@using Core.Shared.Tools
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@{
     ViewData["Title"] = "کاربران";
 }
 
@@ -34,13 +36,13 @@
 		        </div>
 
 		        <div>
-			        <button id="editButton" hidden="true" type="button" class="btn btn-primary position-relative ml-1"
-			                data-toggle="tooltip" data-placement="top" title="ویرایش">
+			        <a id="editButton" hidden="true" class="btn btn-primary position-relative ml-1"
+                            data-toggle="tooltip" data-placement="top" title="ویرایش">
 				        <i class="fe fe-24 fe-edit-2"></i>
 				        @*<span style="font-size: 100%;" id="editBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">
 					        0
 				        </span>*@
-			        </button>
+			        </a>
 
 			        <button id="deleteButton" hidden="true" type="button" class="btn btn-primary position-relative" onclick="deleteEvent()"
 			                data-toggle="tooltip" data-placement="top" title="حذف">
@@ -103,6 +105,22 @@
 <span class="AntiForge"> @Html.AntiForgeryToken() </span>
 
 @section Scripts {
+    
+    @if (TempData["Response"] != null && (Response)TempData["Response"] == Response.Success)
+    {
+        <script type="text/javascript">
+            Swal.fire({
+                icon: 'success',
+                title: '@TempData["AlertMessage"]',
+                confirmButtonText: 'تایید',
+                timer: 3000
+            });
+        </script>
+
+        TempData.Remove("Response");
+        TempData.Remove("AlertMessage");
+    }
+
     <script type="text/javascript">
         $(document).ready(function() {
             $("#deleteButton").hide();
@@ -266,6 +284,7 @@
                 if (selectedIds.length > 0) {
                     $("#deleteButton").fadeIn(300);
                     if (selectedIds.length === 1) {
+                        $("#editButton").attr("href", $(location).attr('href') + "/Edit/" + selectedIds[0]);
                         $("#editButton").fadeIn(300);
                     } else {
                         $("#editButton").fadeOut(300);

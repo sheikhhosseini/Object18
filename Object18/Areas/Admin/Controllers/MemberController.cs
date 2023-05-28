@@ -1,9 +1,7 @@
 ﻿using Core.Modules.MemberModule.Dtos;
 using Core.Modules.MemberModule.Services;
 using Core.Shared.Paging;
-using Core.Shared.Tools;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 
 namespace Object18.Areas.Admin.Controllers;
 
@@ -17,7 +15,6 @@ public class MemberController : Controller
         _memberService = memberService;
     }
 
-    // GET: MemberController
     public ActionResult Index()
     {
         return View();
@@ -59,13 +56,6 @@ public class MemberController : Controller
     }
 
 
-
-
-
-
-
-
-
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(MemberCreateDto input)
@@ -75,7 +65,8 @@ public class MemberController : Controller
             var result = await _memberService.Create(input);
             if (result.Response == Core.Shared.Tools.Response.Success)
             {
-                TempData["alert"] = "insertMemberDone";
+                TempData["Response"] = result.Response;
+                TempData["AlertMessage"] = result.Message;
                 return RedirectToAction(nameof(Index));
             }
             else
@@ -88,47 +79,36 @@ public class MemberController : Controller
     }
 
 
-
-
-    // GET: MemberController/Create
     public ActionResult Create()
     {
         return View();
     }
 
-    // POST: MemberController/Create
-    //[HttpPost]
-    //[ValidateAntiForgeryToken]
-    //public ActionResult Create(IFormCollection collection)
-    //{
-    //    try
-    //    {
-    //        return RedirectToAction(nameof(Index));
-    //    }
-    //    catch
-    //    {
-    //        return View();
-    //    }
-    //}
-
-    // GET: MemberController/Edit/5
-    public ActionResult Edit(int id)
+    public async Task<ActionResult> Edit(int id)
     {
-        return View();
+        return View(await _memberService.Get(id));
     }
 
-    // POST: MemberController/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public ActionResult Edit(int id, IFormCollection collection)
+    public async Task<IActionResult> Edit(MemberUpdateDto updateDto)
     {
-        try
+        if (ModelState.IsValid)
         {
+            var result = await _memberService.Update(updateDto);
+            if (result.Response == Core.Shared.Tools.Response.Success)
+            {
+                TempData["Response"] = result.Response;
+                TempData["AlertMessage"] = result.Message;
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+
+            }
             return RedirectToAction(nameof(Index));
         }
-        catch
-        {
-            return View();
-        }
+
+        return View(updateDto);
     }
 }
