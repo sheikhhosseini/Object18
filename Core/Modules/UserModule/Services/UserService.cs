@@ -24,7 +24,7 @@ public class UserService : IUserService
         AdvanceDataTable<UserDataTableDto> data
     )
     {
-        var query = _dbContext.GetEntitiesAsNoTrackingQuery<User>();
+        var query = _dbContext.GetAsNoTrackingQuery<User>();
 
         foreach (var filter in data.Filters)
         {
@@ -72,13 +72,13 @@ public class UserService : IUserService
 
     public async Task<UserUpdateDto> Update(UserUpdateDto updateDto)
     {
-        var existingUser = await _dbContext.GetEntitiesQuery<User>()
+        var existingUser = await _dbContext.Users
             .Where(u => u.Id == 1)
             .SingleOrDefaultAsync();
 
         _mapper.Map(updateDto, existingUser);
 
-        _dbContext.UpdateEntityAsync(existingUser);
+        _dbContext.UpdateEntity(existingUser);
         await _dbContext.SaveChangesAsync();
 
         var x = new OperationResult<UserUpdateDto>
@@ -94,7 +94,7 @@ public class UserService : IUserService
 
     public async Task<UserUpdateDto> Get(long id)
     {
-        var existingUser = await _dbContext.GetEntitiesQuery<User>()
+        var existingUser = await _dbContext.Users
             .Where(u => u.Id == id)
             .SingleOrDefaultAsync();
 
@@ -103,7 +103,7 @@ public class UserService : IUserService
 
     public async Task<OperationResult<UserUpdateDto>> Delete(List<long> deleteDtos)
     {
-        var users = await _dbContext.GetEntitiesQuery<User>()
+        var users = await _dbContext.Users
             .Where(u => deleteDtos.Contains(u.Id))
             .ToListAsync();
 

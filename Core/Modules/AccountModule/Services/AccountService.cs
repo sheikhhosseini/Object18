@@ -33,7 +33,7 @@ public class AccountService : IAccountService
         newUser.UserImage = "Default.jpg";
         newUser.Password.EncodePasswordMd5();
 
-        await _dbContext.AddEntityAsync(newUser, false);
+        await _dbContext.AddEntityAsync(newUser);
         await _dbContext.SaveChangesAsync();
 
         #region Send Email
@@ -64,7 +64,7 @@ public class AccountService : IAccountService
             {
                 user.IsActive = true;
                 user.ActiveCode = MyUniqCode.GenerateActiveCode();
-                _dbContext.UpdateEntityAsync(user);
+                _dbContext.UpdateEntity(user);
                 await _dbContext.SaveChangesAsync();
                 return ActiveAccountResult.Success;
             }
@@ -94,11 +94,11 @@ public class AccountService : IAccountService
             new(ClaimTypes.Email, user.Email)
         };
 
-        var roleIds = await _dbContext.GetEntitiesAsNoTrackingQuery<UserRole>()
+        var roleIds = await _dbContext.GetAsNoTrackingQuery<UserRole>()
             .Where(x => x.UserId == user.Id)
             .Select(x => x.RoleId).ToArrayAsync();
 
-        var permissions = await _dbContext.GetEntitiesAsNoTrackingQuery<RolePermission>()
+        var permissions = await _dbContext.GetAsNoTrackingQuery<RolePermission>()
             .Where(x => roleIds.Contains(x.RoleId))
             .Select(x => x.Permission.PermissionName).ToListAsync();
 
@@ -109,11 +109,11 @@ public class AccountService : IAccountService
 
     public async Task<bool> HasPermission(long userId, string permissionName)
     {
-        var roleIds = await _dbContext.GetEntitiesAsNoTrackingQuery<UserRole>()
+        var roleIds = await _dbContext.GetAsNoTrackingQuery<UserRole>()
             .Where(x => x.UserId == userId)
             .Select(x => x.RoleId).ToArrayAsync();
 
-        var permissions = await _dbContext.GetEntitiesAsNoTrackingQuery<RolePermission>()
+        var permissions = await _dbContext.GetAsNoTrackingQuery<RolePermission>()
             .Where(x => roleIds.Contains(x.RoleId))
             .Select(x => x.Permission.PermissionName).ToListAsync();
 

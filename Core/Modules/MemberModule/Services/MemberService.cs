@@ -31,7 +31,7 @@ public class MemberService : IMemberService
         AdvanceDataTable<MemberDataTableDto> data
     )
     {
-        return await _dataTable.GetDataTable(_dbContext.GetEntitiesAsNoTrackingQuery<Member>(), data);
+        return await _dataTable.GetDataTable(_dbContext.GetAsNoTrackingQuery<Member>(), data);
     }
 
     public async Task<OperationResult<MemberUpdateDto>> Create(MemberCreateDto createDto)
@@ -93,13 +93,13 @@ public class MemberService : IMemberService
             };
         }
 
-        var existingMember = await _dbContext.GetEntitiesQuery<Member>()
+        var existingMember = await _dbContext.Members
             .Where(u => u.Id == updateDto.Id)
             .SingleOrDefaultAsync();
 
         _mapper.Map(updateDto, existingMember);
 
-        _dbContext.UpdateEntityAsync(existingMember);
+        _dbContext.UpdateEntity(existingMember);
         await _dbContext.SaveChangesAsync();
 
         return new OperationResult<MemberUpdateDto>
@@ -112,7 +112,7 @@ public class MemberService : IMemberService
 
     public async Task<MemberUpdateDto> Get(long id)
     {
-        return await _dbContext.GetEntitiesQuery<Member>()
+        return await _dbContext.Members
             .Where(u => u.Id == id)
             .ProjectTo<MemberUpdateDto>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();
@@ -120,7 +120,7 @@ public class MemberService : IMemberService
 
     public async Task<OperationResult<MemberUpdateDto>> Delete(List<long> deleteDtos)
     {
-        var users = await _dbContext.GetEntitiesQuery<Member>()
+        var users = await _dbContext.Members
             .Where(u => deleteDtos.Contains(u.Id))
             .ToListAsync();
 
@@ -141,13 +141,13 @@ public class MemberService : IMemberService
 
     public async Task<bool> IsKodMeliDuplicate(long? id, string kodMeli)
     {
-        return await _dbContext.Members.AsNoTracking()
+        return await _dbContext.GetAsNoTrackingQuery<Member>()
             .AnyAsync(member => member.Id != id && member.KodMeli == kodMeli);
     }
 
     public async Task<bool> IsMobileNumberDuplicate(long? id, string mobileNumber)
     {
-        return await _dbContext.Members.AsNoTracking()
+        return await _dbContext.GetAsNoTrackingQuery<Member>()
             .AnyAsync(member => member.Id != id && member.MobileNumber == mobileNumber);
     }
 }
