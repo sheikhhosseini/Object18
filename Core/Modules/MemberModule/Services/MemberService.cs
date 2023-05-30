@@ -73,6 +73,8 @@ public class MemberService : IMemberService
 
     public async Task<OperationResult<MemberUpdateDto>> Update(MemberUpdateDto updateDto)
     {
+        throw new DbUpdateConcurrencyException();
+
         if (await IsKodMeliDuplicate(updateDto.Id, updateDto.KodMeli))
         {
             return new OperationResult<MemberUpdateDto>
@@ -94,12 +96,20 @@ public class MemberService : IMemberService
         }
 
         var existingMember = await _dbContext.Members
-            .Where(u => u.Id == updateDto.Id)
+            .Where(member => member.Id == updateDto.Id)
             .SingleOrDefaultAsync();
+
+        if (existingMember == null) return null;
 
         _mapper.Map(updateDto, existingMember);
 
         _dbContext.UpdateEntity(existingMember);
+
+        _dbContext.Entry(existingMember).Property(member => member.ConcurrencyStamp).OriginalValue =
+            updateDto.ConcurrencyStamp;
+
+        existingMember.ConcurrencyStamp = Guid.NewGuid().ToString();
+
         await _dbContext.SaveChangesAsync();
 
         return new OperationResult<MemberUpdateDto>

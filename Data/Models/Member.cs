@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Data.Models;
 
-public class Member : BaseModel
+public class Member : BaseModel , IHaveConcurrencyStamp
 {
     public string FirstName { get; set; }
 
@@ -28,6 +28,9 @@ public class Member : BaseModel
 
     [NotMapped]
     public string FullName => $"{FirstName} {LastName}";
+
+    public string ConcurrencyStamp { get; set; } =  Guid.NewGuid().ToString();
+
 }
 
 public class MemberConfig : IEntityTypeConfiguration<Member>
@@ -66,6 +69,9 @@ public class MemberConfig : IEntityTypeConfiguration<Member>
 
         builder.Property(u => u.Image)
             .HasMaxLength(200);
+
+        builder.Property(e => e.ConcurrencyStamp)
+            .IsConcurrencyToken();
 
         // index
         builder.HasIndex(u=>u.MobileNumber)
