@@ -51,7 +51,7 @@ public class MemberCreateDto
     [MaxLength(400, ErrorMessage = "تعداد کاراکتر های {0} نمیتواند بیشتر از {1} باشد")]
     public string Address { get; set; }
 
-    public IFormFile Image { get; set; }
+    public IFormFile ImageFile { get; set; }
 }
 
 public class MemberCreateDtoProfile : Profile

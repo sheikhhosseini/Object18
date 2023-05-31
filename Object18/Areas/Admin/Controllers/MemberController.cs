@@ -57,7 +57,6 @@ public class MemberController : Controller
         return Json(await _memberService.Delete(ids));
     }
 
-
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(MemberCreateDto createDto)
@@ -76,7 +75,6 @@ public class MemberController : Controller
 
         return View(createDto);
     }
-
 
     public ActionResult Create()
     {

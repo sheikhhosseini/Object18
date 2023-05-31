@@ -57,7 +57,7 @@ public class MemberService : IMemberService
         }
 
         var newMember = _mapper.Map<Member>(createDto);
-        string imageName = await FileSaver.CreateImage(createDto.Image);
+        string imageName = await FileSaver.CreateImage(createDto.ImageFile, nameof(Member));
         newMember.Image = imageName;
 
         await _dbContext.AddEntityAsync(newMember);
@@ -73,8 +73,6 @@ public class MemberService : IMemberService
 
     public async Task<OperationResult<MemberUpdateDto>> Update(MemberUpdateDto updateDto)
     {
-        throw new DbUpdateConcurrencyException();
-
         if (await IsKodMeliDuplicate(updateDto.Id, updateDto.KodMeli))
         {
             return new OperationResult<MemberUpdateDto>
@@ -102,6 +100,8 @@ public class MemberService : IMemberService
         if (existingMember == null) return null;
 
         _mapper.Map(updateDto, existingMember);
+
+        existingMember.Image = await FileSaver.UpdateImage(updateDto.ImageFile, existingMember.Image, nameof(Member));
 
         _dbContext.UpdateEntity(existingMember);
 

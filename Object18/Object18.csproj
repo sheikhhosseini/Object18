@@ -42,7 +42,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\Images\UserAvatar\" />
+    <Folder Include="wwwroot\Images\" />
   </ItemGroup>
 
 </Project>

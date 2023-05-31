@@ -56,7 +56,7 @@ public class UserService : IUserService
     public async Task<OperationResult<UserUpdateDto>> Create(UserCreateDto createDto)
     {
         var newUser = _mapper.Map<User>(createDto);
-        string imageName = await FileSaver.CreateImage(createDto.UserImage);
+        string imageName = await FileSaver.CreateImage(createDto.UserImage, nameof(User));
         newUser.UserImage = imageName;
 
         await _dbContext.AddEntityAsync(newUser);
