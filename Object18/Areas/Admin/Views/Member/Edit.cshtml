@@ -95,6 +95,9 @@
                             <input asp-for="ImageFile" class="form-control" />
                             <span asp-validation-for="ImageFile" class="text-danger"></span>
                         </div>
+                        <div class="avatar avatar-xl">
+                            <img src="@FilePathHelper.ImagePath(Model.Image)" alt="..." class="avatar-img rounded-circle">
+                        </div>
                     </div>
                     <div class="row">
                         <div class="col-md-4">
