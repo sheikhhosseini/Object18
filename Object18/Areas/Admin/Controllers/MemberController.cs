@@ -1,6 +1,7 @@
 ﻿using Core.Modules.MemberModule.Dtos;
 using Core.Modules.MemberModule.Services;
 using Core.Shared.Paging;
+using Core.Shared.Tools;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,21 +25,29 @@ public class MemberController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<ActionResult> Test1(string data)
+    public ActionResult GetGenderDataSource()
     {
-        var result = new List<Sample>
+        var result = new List<SelectItemDto>
         {
             new()
             {
-                Id = 1,
-                Text = "aaa"
+                Text = "مرد",
+                Id = "true"
             },
             new()
             {
-                Id = 2,
-                Text = "bbb"
+                Text = "زن",
+                Id = "false"
             }
         };
+        return new JsonResult(result);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<ActionResult> GetMissionDataSource()
+    {
+        var result = await _memberService.SelectItems();
         return new JsonResult(result);
     }
 

@@ -175,31 +175,32 @@
                 type: "date",
                 value: ""
             },
-            //{
-            //    name: "Email",
-            //    label: "ایمیل",
-            //    type: "text",
-            //    value: ""
-            //},
-            //{
-            //    name: "Gender",
-            //    label: "جنسیت",
-            //    type: "text",
-            //    value: ""
-            //},
-            //{
-            //    name: "Address",
-            //    label: "آدرس",
-            //    type: "text",
-            //    value: ""
-            //},
-            //{
-            //    name: "email",
-            //    label: "ایمیل",
-            //    type: "list",
-            //    value: "",
-            //    dataSourceUrl: 'https://@Context.Request.Host/Admin/User/Test1'
-            //}
+            {
+                name: "Email",
+                label: "ایمیل",
+                type: "text",
+                value: ""
+            },
+            {
+                name: "Gender",
+                label: "جنسیت",
+                type: "list",
+                value: "",
+                dataSourceUrl: 'https://@Context.Request.Host/Admin/Member/GetGenderDataSource'
+            },
+            {
+                name: "Missions",
+                label: "ماموریت ها",
+                type: "list",
+                value: "",
+                dataSourceUrl: 'https://@Context.Request.Host/Admin/Member/GetMissionDataSource'
+            },
+            {
+                name: "Address",
+                label: "آدرس",
+                type: "text",
+                value: ""
+            }
         ];
 
         const columnDefs = [

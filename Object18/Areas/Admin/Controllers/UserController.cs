@@ -1,6 +1,7 @@
 ﻿using Core.Modules.UserModule.Dtos;
 using Core.Modules.UserModule.Services;
 using Core.Shared.Paging;
+using Core.Shared.Tools;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
@@ -26,17 +27,17 @@ public class UserController : Controller
     [ValidateAntiForgeryToken]
     public async Task<ActionResult> Test1(string data)
     {
-        var result = new List<Sample>
+        var result = new List<SelectItemDto>
         {
             new()
             {
-                Id = 1,
-                Text = "aaa"
+                Text = "1",
+                Id = "aaa"
             },
             new()
             {
-                Id = 2,
-                Text = "bbb"
+                Text = "1",
+                Id = "aaa"
             }
         };
         return new JsonResult(result);
@@ -126,10 +127,4 @@ public class UserController : Controller
             return View();
         }
     }
-}
-
-public class Sample
-{
-    public int Id { get; set; }
-    public string Text { get; set; }
 }

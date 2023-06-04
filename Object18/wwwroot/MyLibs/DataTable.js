@@ -69,12 +69,14 @@ function generateFilter() {
             filters[i].label +
             '</option>';
 
-        keyOperatorOptions += '<option ' +
-            'value="' +
-            filterOperators[i].value +
-            '">' +
-            filterOperators[i].name +
-            '</option>';
+        if (i <  filterOperators.length) {
+            keyOperatorOptions += '<option ' +
+                'value="' +
+                filterOperators[i].value +
+                '">' +
+                filterOperators[i].name +
+                '</option>';
+        }
     }
     result += '<div class="col-sm-2 mb-2">' +
         '<select id="' +
@@ -215,7 +217,7 @@ function onKeyNameChange(input) {
                 dataType: "json",
                 url: selectedFilterDataSourceUrl,
                 contentType: "application/json",
-                data: JSON.stringify('ss'),
+                //data: JSON.stringify('ss'),
                 processResults: function (data) {
                     return {
                         results: data

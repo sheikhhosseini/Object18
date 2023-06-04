@@ -149,6 +149,29 @@ public class MemberService : IMemberService
         };
     }
 
+    public async Task<List<SelectItemDto>> SelectItems()
+    {
+        return await _dbContext.GetAsNoTrackingQuery<Mission>()
+            .Select(mission => new SelectItemDto
+            {
+                Id = mission.Id.ToString(),
+                Text = mission.Title
+            }).ToListAsync();
+
+
+        List<long> ids = new List<long>();
+
+        return await _dbContext.Members
+            .Include("Members")
+            .Where(member => member.Missions.Any(mission => ids.Contains(mission.Id)))
+            .Select(mission => new SelectItemDto
+            {
+                Id = mission.Id.ToString(),
+                Text = "aa"
+            })
+            .ToListAsync();
+    }
+
     public async Task<bool> IsKodMeliDuplicate(long? id, string kodMeli)
     {
         return await _dbContext.GetAsNoTrackingQuery<Member>()

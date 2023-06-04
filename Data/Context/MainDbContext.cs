@@ -66,6 +66,7 @@ public class MainDbContext : DbContext
     public DbSet<Role> Roles { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<Member> Members { get; set; }
+    public DbSet<Mission> Missions { get; set; }
     #endregion
 
     #region OnModelCreating

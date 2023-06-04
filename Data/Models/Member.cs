@@ -31,6 +31,7 @@ public class Member : BaseModel , IHaveConcurrencyStamp
 
     public string ConcurrencyStamp { get; set; } =  Guid.NewGuid().ToString();
 
+    public ICollection<Mission> Missions { get; set; }
 }
 
 public class MemberConfig : IEntityTypeConfiguration<Member>

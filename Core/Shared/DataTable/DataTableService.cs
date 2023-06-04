@@ -34,9 +34,34 @@ public class DataTableService : IDataTableService
             {
                 query = query.Where("string.Compare(" + filter.KeyName + ", @0)" + filter.KeyOperator + "0", filter.KeyValue.First());
             }
-            else if (filter.KeyType == "list")
+            else if (filter.KeyType == "list" && filter.KeyValue.Count > 0 && !string.IsNullOrEmpty(filter.KeyValue.First()))
             {
+                if (bool.TryParse(filter.KeyValue.First(), out _))
+                {
+                    List<bool> booleanValues = filter.KeyValue.ConvertAll(bool.Parse);
 
+                    query = query
+                        .Where($"@0.Contains({filter.KeyName})", booleanValues);
+                }
+                else
+                {
+                    List<long> ids = filter.KeyValue.ConvertAll(long.Parse);
+
+                    switch (filter.KeyOperator)
+                    {
+                        case "=*":
+                            query = query
+                                .Include($"{filter.KeyName}")
+                                .Where($"{filter.KeyName}.Any(@0.Contains(Id))", ids);
+                            break;
+
+                        case "!*":
+                            query = query
+                                .Include($"{filter.KeyName}")
+                                .Where($"!{filter.KeyName}.Any(@0.Contains(Id))", ids);
+                            break;
+                    }
+                }
             }
         }
 
