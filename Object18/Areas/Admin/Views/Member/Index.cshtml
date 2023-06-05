@@ -247,9 +247,15 @@
                 width: 150
             },
             {
-                headerName: 'جنسیت',
+                headerName: "جنسیت",
                 field: "Gender",
-                width: 150
+                width: 150,
+                cellRenderer: GenderCellRenderer,
+                cellRendererParams: function(params) {
+                    return {
+                        cellValue: params.data.gender
+                    };
+                }
             },
             {
                 headerName: 'آدرس',
