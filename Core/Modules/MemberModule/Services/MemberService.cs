@@ -28,10 +28,10 @@ public class MemberService : IMemberService
     }
 
     public async Task<AdvanceDataTable<MemberDataTableDto>> GetDataTable(
-        AdvanceDataTable<MemberDataTableDto> data
+        AdvanceDataTable<MemberDataTableDto> dataTableRequest
     )
     {
-        return await _dataTable.GetDataTable(_dbContext.GetAsNoTrackingQuery<Member>(), data);
+        return await _dataTable.GetDataTable(_dbContext.GetAsNoTrackingQuery<Member>(), dataTableRequest);
     }
 
     public async Task<OperationResult<MemberUpdateDto>> Create(MemberCreateDto createDto)
@@ -65,7 +65,7 @@ public class MemberService : IMemberService
 
         return new OperationResult<MemberUpdateDto>
         {
-            Message = "عضو جدید با موفقیت ایجاد شد",
+            Message = "عضو جدید با موفقیت ایجاد شد.",
             Type = OperationResultType.Single,
             Response = Response.Success
         };
@@ -116,27 +116,27 @@ public class MemberService : IMemberService
         {
             Type = OperationResultType.Single,
             Response = Response.Success,
-            Message = "عضو با موفقیت ویرایش شد"
+            Message = "عضو با موفقیت ویرایش شد."
         };
     }
 
     public async Task<MemberUpdateDto> Get(long id)
     {
         return await _dbContext.Members
-            .Where(u => u.Id == id)
+            .Where(member => member.Id == id)
             .ProjectTo<MemberUpdateDto>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();
     }
 
     public async Task<OperationResult<MemberUpdateDto>> Delete(List<long> deleteDtos)
     {
-        var users = await _dbContext.Members
+        var members = await _dbContext.Members
             .Where(u => deleteDtos.Contains(u.Id))
             .ToListAsync();
 
-        foreach (var user in users)
+        foreach (var member in members)
         {
-            _dbContext.SoftRemoveEntity(user);
+            _dbContext.SoftRemoveEntity(member);
         }
 
         await _dbContext.SaveChangesAsync();
@@ -145,7 +145,7 @@ public class MemberService : IMemberService
         {
             Type = OperationResultType.Single,
             Response = Response.Success,
-            Message = $"'{users.Count}' کاربر با موفقیت حذف شد",
+            Message = $"'{members.Count}' عضو با موفقیت حذف شد.",
         };
     }
 
@@ -157,19 +157,6 @@ public class MemberService : IMemberService
                 Id = mission.Id.ToString(),
                 Text = mission.Title
             }).ToListAsync();
-
-
-        List<long> ids = new List<long>();
-
-        return await _dbContext.Members
-            .Include("Members")
-            .Where(member => member.Missions.Any(mission => ids.Contains(mission.Id)))
-            .Select(mission => new SelectItemDto
-            {
-                Id = mission.Id.ToString(),
-                Text = "aa"
-            })
-            .ToListAsync();
     }
 
     public async Task<bool> IsKodMeliDuplicate(long? id, string kodMeli)

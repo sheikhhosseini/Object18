@@ -6,13 +6,13 @@ namespace Core.Modules.MemberModule.Services;
 
 public interface IMemberService
 {
-    Task<AdvanceDataTable<MemberDataTableDto>> GetDataTable(AdvanceDataTable<MemberDataTableDto> data);
+    Task<AdvanceDataTable<MemberDataTableDto>> GetDataTable(AdvanceDataTable<MemberDataTableDto> dataTableRequest);
 
     Task<OperationResult<MemberUpdateDto>> Create(MemberCreateDto createDto);
 
-    Task<OperationResult<MemberUpdateDto>> Update(MemberUpdateDto updateDto);
-
     Task<MemberUpdateDto> Get(long id);
+
+    Task<OperationResult<MemberUpdateDto>> Update(MemberUpdateDto updateDto);
 
     Task<OperationResult<MemberUpdateDto>> Delete(List<long> deleteDtos);
 
