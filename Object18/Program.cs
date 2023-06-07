@@ -1,7 +1,14 @@
-using Data.Context;
+﻿using Data.Context;
+using Data.Models;
 using Ioc;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
+using System.Reflection;
+using Object18.Areas.Admin.Controllers;
+using Object18.PermissionChecker;
+using static System.Net.Mime.MediaTypeNames;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,7 +52,31 @@ static void RegisterServices(IServiceCollection services)
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
+    app.UseExceptionHandler(exceptionHandlerApp =>
+    {
+        exceptionHandlerApp.Run(async context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+
+            // using static System.Net.Mime.MediaTypeNames;
+            context.Response.ContentType = Text.Plain;
+
+            await context.Response.WriteAsync("An exception was thrown.");
+
+            var exceptionHandlerPathFeature =
+                context.Features.Get<IExceptionHandlerPathFeature>();
+
+            if (exceptionHandlerPathFeature?.Error is DbUpdateConcurrencyException)
+            {
+                await context.Response.WriteAsync($" The file was not found.");
+            }
+
+            if (exceptionHandlerPathFeature?.Path == "/")
+            {
+                await context.Response.WriteAsync(" Page: Home.");
+            }
+        });
+    });
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
@@ -64,5 +95,7 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+DynamicPermission.GenerateDynamicPermissions(app);
 
 app.Run();

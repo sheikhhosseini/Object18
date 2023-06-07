@@ -3,6 +3,8 @@ using Core.Modules.MemberModule.Services;
 using Core.Shared.Paging;
 using Core.Shared.Tools;
 using Microsoft.AspNetCore.Mvc;
+using Object18.Controllers;
+using Object18.PermissionChecker;
 
 namespace Object18.Areas.Admin.Controllers;
 
@@ -21,6 +23,7 @@ public class MemberController : Controller
         return View();
     }
 
+    //[Permission(MemberControllerPermissions.List)]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<ActionResult> GetDataTable([FromBody] AdvanceDataTable<MemberDataTableDto> data)
@@ -33,6 +36,7 @@ public class MemberController : Controller
         return View();
     }
 
+    //[Permission(MemberControllerPermissions.Create)]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(MemberCreateDto createDto)
@@ -57,6 +61,7 @@ public class MemberController : Controller
         return View(await _memberService.Get(id));
     }
 
+    //[Permission(MemberControllerPermissions.Update)]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(MemberUpdateDto updateDto)
@@ -76,6 +81,7 @@ public class MemberController : Controller
         return View(updateDto);
     }
 
+    //[Permission(MemberControllerPermissions.Delete)]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete([FromBody] List<MemberDeleteDto> deleteDtos)

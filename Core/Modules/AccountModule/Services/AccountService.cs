@@ -100,7 +100,7 @@ public class AccountService : IAccountService
 
         var permissions = await _dbContext.GetAsNoTrackingQuery<RolePermission>()
             .Where(x => roleIds.Contains(x.RoleId))
-            .Select(x => x.Permission.PermissionName).ToListAsync();
+            .Select(x => x.Permission.Name).ToListAsync();
 
         permissions.ForEach(x=>claims.Add(new("permission", x)));
 
@@ -115,7 +115,7 @@ public class AccountService : IAccountService
 
         var permissions = await _dbContext.GetAsNoTrackingQuery<RolePermission>()
             .Where(x => roleIds.Contains(x.RoleId))
-            .Select(x => x.Permission.PermissionName).ToListAsync();
+            .Select(x => x.Permission.Name).ToListAsync();
 
         return permissions.Any(x => x == permissionName);
     }
