@@ -36,6 +36,14 @@ public class MainDbContext : DbContext
         await AddAsync(entity);
     }
 
+    public async Task AddEntitiesAsync<TEntity>(params TEntity[] entities) where TEntity : BaseModel
+    {
+        foreach (var entity in entities)
+        {
+            await AddEntityAsync(entity);
+        }
+    }
+
     public void UpdateEntity<TEntity>(TEntity entity) where TEntity : BaseModel
     {
         entity.LastUpdateDate = DateTime.Now;
@@ -51,6 +59,15 @@ public class MainDbContext : DbContext
     {
         entity.IsDelete = true;
         UpdateEntity(entity);
+    }
+
+    public void SoftRemoveEntities<TEntity>(List<TEntity> entities) where TEntity : BaseModel
+    {
+        foreach (var entity in entities)
+        {
+            entity.IsDelete = true;
+            UpdateEntity(entity);
+        }
     }
 
     public void HardRemoveEntity<TEntity>(TEntity entity) where TEntity : BaseModel

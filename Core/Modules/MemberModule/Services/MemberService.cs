@@ -7,6 +7,7 @@ using Data.Context;
 using Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Core.Shared.DataTable;
+using System.Threading;
 
 namespace Core.Modules.MemberModule.Services;
 
@@ -128,16 +129,32 @@ public class MemberService : IMemberService
             .SingleOrDefaultAsync();
     }
 
-    public async Task<OperationResult<MemberUpdateDto>> Delete(List<long> deleteDtos)
+    public async Task<OperationResult<MemberUpdateDto>> Delete(List<MemberDeleteDto> deleteDtos)
     {
-        var members = await _dbContext.Members
-            .Where(u => deleteDtos.Contains(u.Id))
+        if (deleteDtos is null)
+            throw new ArgumentNullException(nameof(deleteDtos), "deleteDtos cannot be null.");
+
+        var memberIds = deleteDtos.Select(x => x.Id).ToArray();
+
+        var existingMembers = await _dbContext.Members
+            .Where(member => memberIds.Contains(member.Id))
             .ToListAsync();
 
-        foreach (var member in members)
+        foreach (var existingMember in existingMembers)
         {
-            _dbContext.SoftRemoveEntity(member);
+            var deleteDto =
+                deleteDtos.SingleOrDefault(memberDeleteDto => memberDeleteDto.Id == existingMember.Id);
+            if (deleteDto == null) continue;
+
+            if (string.IsNullOrWhiteSpace(deleteDto.ConcurrencyStamp))
+                throw new InvalidOperationException(
+                    $"{nameof(deleteDto.ConcurrencyStamp)} for {nameof(Member)} with {deleteDto.Id} can not be null or empty."); ;
+
+            _dbContext.Entry(existingMember).Property(member => member.ConcurrencyStamp).OriginalValue =
+                deleteDto.ConcurrencyStamp;
         }
+
+        _dbContext.SoftRemoveEntities(existingMembers);
 
         await _dbContext.SaveChangesAsync();
 
@@ -145,7 +162,7 @@ public class MemberService : IMemberService
         {
             Type = OperationResultType.Single,
             Response = Response.Success,
-            Message = $"'{members.Count}' عضو با موفقیت حذف شد.",
+            Message = $"'{existingMembers.Count}' عضو با موفقیت حذف شد.",
         };
     }
 

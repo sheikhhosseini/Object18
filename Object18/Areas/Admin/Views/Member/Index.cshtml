@@ -332,13 +332,13 @@
                         },
                         type: 'POST',
                         url: 'https://@Context.Request.Host/Admin/Member/Delete',
-                        data: JSON.stringify(selectedIds),
+                        data: JSON.stringify(gridOptions.api.getSelectedRows()
+                            .map((x) => ({ id: x.id, concurrencyStamp: x.concurrencyStamp }))),
                         dataType: "json",
                         contentType: "application/json",
                         success: function (result) {
                             if (result.response === 0) {
-                                const gridApi = gridOptions.api;
-                                gridApi.deselectAll();
+                                gridOptions.api.deselectAll();
                                 refresh();
                                 Swal.fire({
                                     icon: 'success',

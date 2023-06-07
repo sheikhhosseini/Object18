@@ -78,9 +78,9 @@ public class MemberController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Delete([FromBody] List<long> ids)
+    public async Task<IActionResult> Delete([FromBody] List<MemberDeleteDto> deleteDtos)
     {
-        return Json(await _memberService.Delete(ids));
+        return Json(await _memberService.Delete(deleteDtos));
     }
 
     [HttpPost]

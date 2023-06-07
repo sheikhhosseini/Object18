@@ -8,6 +8,8 @@ public class MemberDataTableDto : DataTableBaseDto
 {
     public long Id { get; set; }
 
+    public string ConcurrencyStamp { get; set; }
+
     public string FirstName { get; set; }
 
     public string LastName { get; set; }

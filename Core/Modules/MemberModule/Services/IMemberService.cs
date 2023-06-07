@@ -14,7 +14,7 @@ public interface IMemberService
 
     Task<OperationResult<MemberUpdateDto>> Update(MemberUpdateDto updateDto);
 
-    Task<OperationResult<MemberUpdateDto>> Delete(List<long> deleteDtos);
+    Task<OperationResult<MemberUpdateDto>> Delete(List<MemberDeleteDto> deleteDtos);
 
     Task<List<SelectItemDto>> SelectItems();
 }
