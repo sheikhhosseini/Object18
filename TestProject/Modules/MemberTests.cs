@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -86,14 +87,14 @@ public class MemberTests : DbContextFixture
     /// اگر شماه موبایل تکراری باشد 
     /// </summary>
     [Fact]
-    public async Task Create_Duplicate_MobileNumber_ReturnsFailed()
+    public async Task Create_Member_Duplicate_MobileNumber_ReturnsFailed()
     {
         // Arrange  
         var savedMember = MemberFactory.Create();
 
         await using (var dbContext = CreateNewDbContext())
         {
-            dbContext.Add(savedMember);
+            await dbContext.AddEntityAsync(savedMember);
             await dbContext.SaveChangesAsync();
         }
 
@@ -132,14 +133,14 @@ public class MemberTests : DbContextFixture
     /// اگر کد ملی تکراری باشد 
     /// </summary>
     [Fact]
-    public async Task Create_Duplicate_KodMeli_ReturnsFailed()
+    public async Task Create_Member_Duplicate_KodMeli_ReturnsFailed()
     {
         // Arrange  
         var savedMember = MemberFactory.Create();
 
         await using (var dbContext = CreateNewDbContext())
         {
-            dbContext.Add(savedMember);
+            await dbContext.AddEntityAsync(savedMember);
             await dbContext.SaveChangesAsync();
         }
 
@@ -184,7 +185,7 @@ public class MemberTests : DbContextFixture
 
         await using (var dbContext = CreateNewDbContext())
         {
-            dbContext.Add(savedMember);
+            await dbContext.AddEntityAsync(savedMember);
             await dbContext.SaveChangesAsync();
         }
 
@@ -239,7 +240,7 @@ public class MemberTests : DbContextFixture
     /// اگر شماه موبایل تکراری باشد 
     /// </summary>
     [Fact]
-    public async Task Update_Duplicate_MobileNumber_ReturnsFailed()
+    public async Task Update_Member_Duplicate_MobileNumber_ReturnsFailed()
     {
         // Arrange  
         var savedMember1 = MemberFactory.Create();
@@ -247,7 +248,7 @@ public class MemberTests : DbContextFixture
 
         await using (var dbContext = CreateNewDbContext())
         {
-            dbContext.AddRange(savedMember1, savedMember2);
+            await dbContext.AddEntitiesAsync(savedMember1, savedMember2);
             await dbContext.SaveChangesAsync();
         }
 
@@ -288,7 +289,7 @@ public class MemberTests : DbContextFixture
     /// اگر شماه کد ملی باشد 
     /// </summary>
     [Fact]
-    public async Task Update_Duplicate_KodMeli_ReturnsFailed()
+    public async Task Update_Member_Duplicate_KodMeli_ReturnsFailed()
     {
         // Arrange  
         var savedMember1 = MemberFactory.Create();
@@ -296,7 +297,7 @@ public class MemberTests : DbContextFixture
 
         await using (var dbContext = CreateNewDbContext())
         {
-            dbContext.AddRange(savedMember1, savedMember2);
+            await dbContext.AddEntitiesAsync(savedMember1, savedMember2);
             await dbContext.SaveChangesAsync();
         }
 
@@ -337,14 +338,14 @@ public class MemberTests : DbContextFixture
     /// اگر کانکارنسی معتبر نباشد 
     /// </summary>
     [Fact]
-    public async Task Update_Wrong_ConcurrencyStamp_ReturnsFailed()
+    public async Task Update_Member_Wrong_ConcurrencyStamp_ReturnsFailed()
     {   
         // Arrange  
         var savedMember = MemberFactory.Create();
 
         await using (var dbContext = CreateNewDbContext())
         {
-            dbContext.Add(savedMember);
+            await dbContext.AddEntityAsync(savedMember);
             await dbContext.SaveChangesAsync();
         }
 
@@ -393,6 +394,90 @@ public class MemberTests : DbContextFixture
 
             // Assert
             await result.Should().ThrowAsync<DbUpdateConcurrencyException>();
+        }
+    }
+
+    /// <summary>
+    /// حذف عضو باید موفقیت آمیز باشد   
+    /// </summary>
+    [Fact]
+    public async Task Delete_Member_ReturnsSuccess()
+    {
+        // Arrange  
+        var savedMember1 = MemberFactory.Create();
+        var savedMember2 = MemberFactory.Create();
+
+        await using (var dbContext = CreateNewDbContext())
+        {
+            await dbContext.AddEntitiesAsync(savedMember1, savedMember2);
+            await dbContext.SaveChangesAsync();
+        }
+
+        await using (var dbContext = CreateNewDbContext())
+        {
+            var service = CreateService(dbContext);
+
+            var deleteDtos = new List<MemberDeleteDto>
+            {
+                new()
+                {
+                    Id = savedMember1.Id,
+                    ConcurrencyStamp = savedMember1.ConcurrencyStamp,
+                },
+                new()
+                {
+                    Id = savedMember2.Id,
+                    ConcurrencyStamp = savedMember2.ConcurrencyStamp,
+                }
+            };
+
+            // Act
+            var result = await service.Delete(deleteDtos);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Response.Should().Be(Response.Success);
+            result.Type.Should().Be(OperationResultType.Single);
+
+            dbContext.Set<Member>().Should().HaveCount(0);
+        }
+    }
+
+    /// <summary>
+    /// حذف عضو باید خطا بدخد اگر کانکارنسی اشتباه باشد   
+    /// </summary>
+    [Fact]
+    public async Task Delete_Member_Wrong_ConcurrencyStamp_ReturnsFailed()
+    {
+        // Arrange  
+        var savedMember = MemberFactory.Create();
+
+        await using (var dbContext = CreateNewDbContext())
+        {
+            await dbContext.AddEntityAsync(savedMember);
+            await dbContext.SaveChangesAsync();
+        }
+
+        await using (var dbContext = CreateNewDbContext())
+        {
+            var service = CreateService(dbContext);
+
+            var deleteDtos = new List<MemberDeleteDto>
+            {
+                new()
+                {
+                    Id = savedMember.Id,
+                    ConcurrencyStamp = RandomFactory.Text(10)
+                }
+            };
+
+            // Act
+            Func<Task> result = async () => { await service.Delete(deleteDtos); };
+
+            // Assert
+            await result.Should().ThrowAsync<DbUpdateConcurrencyException>();
+
+            dbContext.Set<Member>().Should().HaveCount(1);
         }
     }
 }
