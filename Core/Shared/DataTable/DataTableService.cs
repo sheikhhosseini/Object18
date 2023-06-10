@@ -1,7 +1,6 @@
 ﻿using System.Linq.Dynamic.Core;
 using AutoMapper;
 using Core.Shared.Paging;
-using Data.Context;
 using Data.Models;
 using Gridify;
 using Microsoft.EntityFrameworkCore;
@@ -10,19 +9,17 @@ namespace Core.Shared.DataTable;
 
 public class DataTableService : IDataTableService
 {
-    private readonly MainDbContext _dbContext;
     private readonly IMapper _mapper;
 
-    public DataTableService(MainDbContext dbContext, IMapper mapper)
+    public DataTableService(IMapper mapper)
     {
-        _dbContext = dbContext;
         _mapper = mapper;
     }
 
     public async Task<AdvanceDataTable<TDto>> GetDataTable<TEntity, TDto>(
         IQueryable<TEntity> query,
         AdvanceDataTable<TDto> dataTableRequest
-    ) where TEntity : BaseModel where TDto : DataTableBaseDto
+    ) where TEntity : class, IHaveId where TDto : DataTableBaseDto
     {
         foreach (var filter in dataTableRequest.Filters)
         {
@@ -79,7 +76,7 @@ public class DataTableService : IDataTableService
     private async Task<AdvanceDataTable<TDto>> GeneratePages<TEntity, TDto>(
         AdvanceDataTable<TDto> data,
         IQueryable<TEntity> query
-    ) where TEntity : BaseModel where TDto : DataTableBaseDto
+    ) where TEntity : class, IHaveId where TDto : DataTableBaseDto
     {
 
         var pageCount = (int)Math.Ceiling(query.Count() / (double)data.TakeEntity);

@@ -3,8 +3,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data.Models;
 
-public class PermissionModule : BaseModel
+public class PermissionModule : IHaveId
 {
+    public long Id { get; set; }
+
     public string Name { get; set; }
 
     public ICollection<Permission> Permissions { get; set; }

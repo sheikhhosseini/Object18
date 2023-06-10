@@ -9,7 +9,6 @@ public class UserFactory
 {
     public static User Create()
     {
-        DateTime currentTime = DateTime.Now;
         return new User
         {
             Email = RandomFactory.Email(),
@@ -17,9 +16,7 @@ public class UserFactory
             LastName = RandomFactory.LastName(),
             Password = RandomFactory.Text(5).EncodePasswordMd5(),
             ActiveCode = MyUniqCode.GenerateActiveCode(),
-            UserImage = "Default.jpg",
-            CreateDate = currentTime,
-            LastUpdateDate = currentTime
+            UserImage = "Default.jpg"
         };
     }
 }

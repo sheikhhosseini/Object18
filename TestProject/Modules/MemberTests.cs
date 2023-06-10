@@ -30,7 +30,7 @@ public class MemberTests : DbContextFixture
 
     private IMemberService CreateService(MainDbContext context)
     {
-        return new MemberService(context, _mapper, new DataTableService(context, _mapper));
+        return new MemberService(context, _mapper, new DataTableService(_mapper));
     }
 
     /// <summary>

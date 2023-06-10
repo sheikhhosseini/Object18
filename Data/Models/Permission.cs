@@ -2,8 +2,10 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Data.Models;
-public class Permission : BaseModel
+public class Permission : IHaveId
 {
+    public long Id { get; set; }
+
     public string Name { get; set; }
 
     public long PermissionAreaId { get; set; }

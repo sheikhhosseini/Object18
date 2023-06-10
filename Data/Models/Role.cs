@@ -2,8 +2,14 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Data.Models;
-public class Role : BaseModel
+public class Role : IHaveId , IHaveDateLog
 {
+    public long Id { get; set; }
+
+    public string CreateDate { get; set; }
+
+    public string LastUpdateDate { get; set; }
+
     public string ConcurrencyStamp { get; set; } = Guid.NewGuid().ToString();
 
     public string Name { get; set; }

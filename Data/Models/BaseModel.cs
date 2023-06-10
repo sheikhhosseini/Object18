@@ -1,9 +1,17 @@
 ﻿namespace Data.Models;
 
-public class BaseModel
+public interface IHaveId
 {
     public long Id { get; set; }
+}
+
+public interface IHaveSoftDelete
+{
     public bool IsDelete { get; set; }
-    public DateTime CreateDate { get; set; }
-    public DateTime LastUpdateDate { get; set; }
+}
+
+public interface IHaveDateLog
+{
+    public string CreateDate { get; set; }
+    public string LastUpdateDate { get; set; }
 }

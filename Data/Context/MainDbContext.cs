@@ -14,29 +14,29 @@ public class MainDbContext : DbContext
 
     #region Functions
 
-    public IQueryable<TEntity> GetAsNoTrackingQuery<TEntity>() where TEntity : BaseModel
+    public IQueryable<TEntity> GetAsNoTrackingQuery<TEntity>() where TEntity : class, IHaveId
     {
         return Set<TEntity>().AsNoTracking();
     }
 
-    public IQueryable<TEntity> GetQueryById<TEntity>(long entityId) where TEntity : BaseModel
+    public IQueryable<TEntity> GetQueryById<TEntity>(long entityId) where TEntity : class, IHaveId
     {
         return Set<TEntity>().Where(e => e.Id == entityId);
     }
 
-    public IQueryable<TEntity> GetAsNoTrackingQueryById<TEntity>(long entityId) where TEntity : BaseModel
+    public IQueryable<TEntity> GetAsNoTrackingQueryById<TEntity>(long entityId) where TEntity : class, IHaveId
     {
         return Set<TEntity>().AsNoTracking().Where(e => e.Id == entityId);
     }
 
-    public async Task AddEntityAsync<TEntity>(TEntity entity) where TEntity : BaseModel
+    public async Task AddEntityAsync<TEntity>(TEntity entity) where TEntity : IHaveDateLog
     {
-        entity.CreateDate = DateTime.Now;
+        entity.CreateDate = PersianTime.GetNow();
         entity.LastUpdateDate = entity.CreateDate;
         await AddAsync(entity);
     }
 
-    public async Task AddEntitiesAsync<TEntity>(params TEntity[] entities) where TEntity : BaseModel
+    public async Task AddEntitiesAsync<TEntity>(params TEntity[] entities) where TEntity : IHaveDateLog
     {
         foreach (var entity in entities)
         {
@@ -44,24 +44,24 @@ public class MainDbContext : DbContext
         }
     }
 
-    public void UpdateEntity<TEntity>(TEntity entity) where TEntity : BaseModel
+    public void UpdateEntity<TEntity>(TEntity entity) where TEntity : class, IHaveDateLog
     {
-        entity.LastUpdateDate = DateTime.Now;
+        entity.LastUpdateDate = PersianTime.GetNow();
     }
 
-    public void UpdateEntityAsNoTracking<TEntity>(TEntity entity) where TEntity : BaseModel
+    public void UpdateEntityAsNoTracking<TEntity>(TEntity entity) where TEntity : IHaveDateLog
     {
-        entity.LastUpdateDate = DateTime.Now;
+        entity.LastUpdateDate = PersianTime.GetNow();
         Update(entity);
     }
 
-    public void SoftRemoveEntity<TEntity>(TEntity entity) where TEntity : BaseModel
+    public void SoftRemoveEntity<TEntity>(TEntity entity) where TEntity : class, IHaveSoftDelete, IHaveDateLog
     {
         entity.IsDelete = true;
         UpdateEntity(entity);
     }
 
-    public void SoftRemoveEntities<TEntity>(List<TEntity> entities) where TEntity : BaseModel
+    public void SoftRemoveEntities<TEntity>(List<TEntity> entities) where TEntity : class, IHaveSoftDelete , IHaveDateLog
     {
         foreach (var entity in entities)
         {
@@ -70,10 +70,10 @@ public class MainDbContext : DbContext
         }
     }
 
-    public void HardRemoveEntity<TEntity>(TEntity entity) where TEntity : BaseModel
-    {
-        Remove(entity);
-    }
+    //public void HardRemoveEntity<TEntity>(TEntity entity) where TEntity : IHaveId
+    //{
+    //    Remove(entity);
+    //}
 
     #endregion
 
@@ -95,7 +95,7 @@ public class MainDbContext : DbContext
         // Apply SoftDelete
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            if (typeof(BaseModel).IsAssignableFrom(entityType.ClrType))
+            if (typeof(IHaveSoftDelete).IsAssignableFrom(entityType.ClrType))
             {
                 var parameter = Expression.Parameter(entityType.ClrType, "e");
                 var body = Expression.Equal(

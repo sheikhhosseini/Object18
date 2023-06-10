@@ -2,8 +2,12 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Data.Models;
-public class Mission : BaseModel
+public class Mission : IHaveId , IHaveSoftDelete
 {
+    public long Id { get; set; }
+
+    public bool IsDelete { get; set; }
+
     public string Title { get; set; }
 
     public string Description { get; set; }

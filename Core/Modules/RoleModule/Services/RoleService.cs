@@ -7,8 +7,6 @@ using Data.Context;
 using Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Core.Shared.DataTable;
-using System.Threading;
-using Data.Migrations;
 
 namespace Core.Modules.RoleModule.Services;
 
@@ -155,7 +153,7 @@ public class RoleService : IRoleService
                 deleteDto.ConcurrencyStamp;
         }
 
-        _dbContext.SoftRemoveEntities(existingRoles);
+        _dbContext.Remove(existingRoles);
 
         await _dbContext.SaveChangesAsync();
 

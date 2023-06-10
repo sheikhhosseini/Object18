@@ -4,8 +4,16 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Data.Models;
 
-public class Member : BaseModel , IHaveConcurrencyStamp
+public class Member : IHaveId , IHaveConcurrencyStamp , IHaveSoftDelete , IHaveDateLog
 {
+    public long Id { get; set; }
+
+    public bool IsDelete { get; set; }
+
+    public string CreateDate { get; set; }
+
+    public string LastUpdateDate { get; set; }
+
     public string FirstName { get; set; }
 
     public string LastName { get; set; }

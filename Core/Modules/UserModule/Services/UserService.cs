@@ -109,7 +109,7 @@ public class UserService : IUserService
 
         foreach (var user in users)
         {
-            _dbContext.SoftRemoveEntity(user);
+            _dbContext.Remove(user);
         }
 
         await _dbContext.SaveChangesAsync();

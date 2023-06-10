@@ -2,8 +2,10 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Data.Models;
-public class UserRole : BaseModel
+public class UserRole : IHaveId
 {
+    public long Id { get; set; }
+
     public long UserId { get; set; }
 
     public long RoleId { get; set; }
