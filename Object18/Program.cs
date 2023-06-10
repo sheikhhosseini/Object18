@@ -1,14 +1,10 @@
-﻿using Data.Context;
-using Data.Models;
+﻿using System.Net.Mime;
+using Data.Context;
 using Ioc;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel;
-using System.Reflection;
-using Object18.Areas.Admin.Controllers;
 using Object18.PermissionChecker;
-using static System.Net.Mime.MediaTypeNames;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,7 +55,7 @@ if (!app.Environment.IsDevelopment())
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
             // using static System.Net.Mime.MediaTypeNames;
-            context.Response.ContentType = Text.Plain;
+            context.Response.ContentType = MediaTypeNames.Text.Plain;
 
             await context.Response.WriteAsync("An exception was thrown.");
 

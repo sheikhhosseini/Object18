@@ -5,6 +5,7 @@ using Core.Modules.UserModule.Services;
 using Core.Shared.DataTable;
 using Microsoft.Extensions.DependencyInjection;
 using Core.Shared.Email;
+using Core.Modules.RoleModule.Services;
 
 namespace Ioc;
 
@@ -15,6 +16,7 @@ public class DependencyContainer
         service.AddScoped<IAccountService, AccountService>();
         service.AddScoped<IUserService, UserService>();
         service.AddScoped<IMemberService, MemberService>();
+        service.AddScoped<IRoleService, RoleService>();
 
         #region Email
         service.AddScoped<IMailSender, SendEmail>();

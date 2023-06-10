@@ -1,0 +1,295 @@
+﻿@using Core.Shared.Tools
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "کاربران";
+}
+
+<style>
+    .btn-circle {
+        width: 40px;
+        height: 40px;
+        padding: 6px 0px;
+        border-radius: 50%;
+        text-align: center;
+        font-size: 12px;
+        line-height: 1.42857;
+    }
+</style>
+
+<div class="page-heading">
+    <div class="page-title">
+        <div class="row">
+            <div class="col-12 col-md-6 order-md-1 order-last">
+                <h3>اعضا</h3>
+                <p class="text-subtitle text-muted">اطلاعات پایه -> اعضا</p>
+            </div>
+            <div class="col-12 col-md-6 order-md-2 order-first">
+            </div>
+        </div>
+    </div>
+    <div class="card shadow">
+        <div class="col-sm-12" style="background-color: #1b68ff;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mr-2 card-title pt-3" style="display: inline-block"><a class="text-white text-decoration-none" asp-controller="Role" asp-action="Index">لیست اعضا</a></h5>
+                    <h5 style="display: inline-block"><a class="card-title pt-3 text-white text-decoration-none" asp-controller="Role" asp-action="Create">ایجاد نقش جدید</a></h5>
+                </div>
+
+                <div>
+                    <a id="editButton" hidden="true" class="btn btn-primary position-relative ml-1"
+                       data-toggle="tooltip" data-placement="top" title="ویرایش">
+                        <i class="fe fe-24 fe-edit-2"></i>
+                    </a>
+
+                    <button id="deleteButton" hidden="true" type="button" class="btn btn-primary position-relative" onclick="deleteEvent()"
+                            data-toggle="tooltip" data-placement="top" title="حذف">
+                        <i class="fe fe-24 fe-trash-2" aria-hidden="true"></i>
+                        <span style="font-size: 100%;" id="deleteBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            0
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-header pb-0">
+            <div class="row">
+                <form class="col-sm-12">
+                    <div id="advancedSearch" class="row">
+                    </div>
+                    <button type="button" onclick="search()" class="btn-circle btn btn-primary mb-2"
+                            data-toggle="tooltip" data-placement="top" title="جستجو">
+                        <i class="fe fe-24 fe-search"></i>
+                    </button>
+                    <button type="button" onclick="generateFilter()" class="btn-circle btn btn-warning mb-2"
+                            data-toggle="tooltip" data-placement="top" title="افزودن فیلتر">
+                        <i class="fe fe-24 fe-plus-circle"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="ag-theme-alpine-dark col-sm-12 p-0" id="myGrid" style="height: 40vh;"></div>
+            <br>
+            <div class="row justify-content-between">
+                <div class="col-sm-6">
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination" style="padding-right: 0;">
+                            <li id="previous" class="page-item" onclick="onPageClick('previous')">
+                                <button class="page-link" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </button>
+                            </li>
+
+                            <li id="next" class="page-item">
+                                <button class="page-link" aria-label="Next" onclick="onPageClick('next')">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="col-sm-1">
+                    <select onchange="search()" name="takeEntity" class="form-control">
+                        <option value="5">5</option>
+                        <option selected value="10">10</option>
+                        <option value="20">20</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<span class="AntiForge"> @Html.AntiForgeryToken() </span>
+
+@section Scripts {
+
+    @if (TempData["Response"] != null && (Response)TempData["Response"] == Response.Success)
+    {
+        <script type="text/javascript">
+            Swal.fire({
+                icon: 'success',
+                title: '@TempData["AlertMessage"]',
+                confirmButtonText: 'تایید',
+                timer: 3000
+            });
+        </script>
+
+        TempData.Remove("Response");
+        TempData.Remove("AlertMessage");
+    }
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#deleteButton").hide();
+            $("#editButton").hide();
+            $('#deleteButton').removeAttr('hidden');
+            $('#editButton').removeAttr('hidden');
+
+            generateFilter();
+
+            var data = {
+                filters: GetFilterData(),
+                sortOrder: sortOrder,
+                takeEntity: $('select[name="takeEntity"]').val()
+            };
+            fetchDataFromServer(data);
+        });
+
+        var filters = [
+            {
+                name: "Name",
+                label: "نام",
+                type: "text",
+                value: ""
+            },
+            //{
+            //    name: "Missions",
+            //    label: "ماموریت ها",
+            //    type: "list",
+            //    value: "",
+            //    dataSourceUrl: 'https://@Context.Request.Host/Admin/Role/GetMissionDataSource'
+            //},
+            {
+                name: "Description",
+                label: "توضیحات",
+                type: "text",
+                value: ""
+            }
+        ];
+
+        const columnDefs = [
+            {
+                headerName: 'ردیف',
+                field: "row",
+                width: 120,
+                checkboxSelection: true,
+                headerCheckboxSelection: true
+            },
+            {
+                headerName: 'نام',
+                field: "name",
+                width: 150
+            },
+            {
+                headerName: 'توضیحات',
+                field: "description",
+                width: 300
+            }
+        ];
+
+        const gridOptions = {
+            rowSelection: 'multiple',
+            defaultColDef: {
+                resizable: true,
+                sortable: true,
+                filter: true
+            },
+            columnDefs: columnDefs,
+            enableRtl: true,
+            animateRows: true,
+            onSortChanged() {
+                var colState = gridOptions.columnApi.getColumnState();
+                var sortState = colState
+                    .filter(function (s) {
+                        return s.sort != null;
+                    })
+                    .map(function (s) {
+                        return { keyName: s.colId, keySort: s.sort };
+                    });
+                sortOrder = sortState;
+                search();
+            },
+            onSelectionChanged(event) {
+                selectedIds = event.api.getSelectedRows().map(row => row.id);
+                if (selectedIds.length > 0) {
+                    $("#deleteButton").fadeIn(300);
+                    if (selectedIds.length === 1) {
+                        $("#editButton").attr("href", $(location).attr('href') + "/Edit/" + selectedIds[0]);
+                        $("#editButton").fadeIn(300);
+                    } else {
+                        $("#editButton").fadeOut(300);
+                    }
+                } else {
+                    $("#deleteButton").fadeOut(300);
+                    $("#editButton").fadeOut(300);
+                }
+                $('#deleteBadge').text(selectedIds.length);
+                //$('#editBadge').text(selectedIds.length);
+            }
+        };
+        const eGridDiv = document.getElementById("myGrid");
+        new agGrid.Grid(eGridDiv, gridOptions);
+        const AjaxUrl = 'https://@Context.Request.Host/Admin/Role/GetDataTable';
+
+        function deleteEvent() {
+            var swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: 'btn btn-success m-1',
+                    cancelButton: 'btn btn-danger m-1'
+                },
+                buttonsStyling: false
+            });
+            swalWithBootstrapButtons.fire({
+                title: 'آیا میخواهید نقش را حذف کنید؟',
+                text: "این عملیات غیر قابل بازگشت است!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'حذف نقش',
+                cancelButtonText: 'انصراف',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        headers: {
+                            RequestVerificationToken: $(".AntiForge" + " input").val()
+                        },
+                        type: 'POST',
+                        url: 'https://@Context.Request.Host/Admin/Role/Delete',
+                        data: JSON.stringify(gridOptions.api.getSelectedRows()
+                            .map((x) => ({ id: x.id, concurrencyStamp: x.concurrencyStamp }))),
+                        dataType: "json",
+                        contentType: "application/json",
+                        success: function (result) {
+                            if (result.response === 0) {
+                                gridOptions.api.deselectAll();
+                                refresh();
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: result.message,
+                                    confirmButtonText: 'تایید',
+                                    timer: 3000
+                                });
+                            }
+                            if (result.response === 1) {
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: result.message,
+                                    confirmButtonText: 'تایید',
+                                    timer: 3000
+                                });
+                            }
+                            if (result.response === 2) {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: result.message,
+                                    confirmButtonText: 'تایید',
+                                    timer: 3000
+                                });
+                            }
+                        },
+                        error: function () {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'سمت سرور خطا رخ داده است',
+                                confirmButtonText: 'تایید',
+                                timer: 3000
+                            });
+                        }
+                    });
+                }
+            });
+            return false;
+        }
+
+    </script>
+}

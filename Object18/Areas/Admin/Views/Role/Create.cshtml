@@ -1,0 +1,185 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Core.Shared.Tools
+@model Core.Modules.RoleModule.Dtos.RoleCreateDto
+
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<div class="page-heading">
+    <div class="page-title">
+        <div class="row">
+            <div class="col-12 col-md-6 order-md-1 order-last">
+                <h3>اعضا</h3>
+                <p class="text-subtitle text-muted">اطلاعات پایه -> اعضا</p>
+            </div>
+            <div class="col-12 col-md-6 order-md-2 order-first">
+            </div>
+        </div>
+    </div>
+    <div class="card shadow">
+        <div class="col-sm-12" style="background-color: #1b68ff;">
+            <div>
+                <h5 class="mr-2 card-title pt-3" style="display: inline-block"><a class="text-white text-decoration-none" asp-controller="Role" asp-action="Index">لیست اعضا</a></h5>
+                <h5 style="display: inline-block"><a class="card-title pt-3 text-white text-decoration-none" asp-controller="Role" asp-action="Create">ایجاد نقش جدید</a></h5>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="col-sm-12">
+                <form method="post" asp-area="Admin" asp-controller="Role" asp-action="Create">
+                    <div class="row">
+                        <input type="hidden" id="PermissionIds" multiple />
+                        <div class="card-body col-sm-12">
+                            <ul class="nav nav-tabs mb-3" id="myTab" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">اطلاعات</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">مجوز ها</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content col-sm-12" id="myTabContent">
+                                <div class="tab-pane fade show active col-sm-12" id="home" role="tabpanel" aria-labelledby="home-tab">
+                                    <div class="col-sm-12">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label asp-for="Name">نام</label>
+                                                <input asp-for="Name" class="form-control">
+                                                <span asp-validation-for="Name" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-2">
+                                            <div class="col-md-6">
+                                                <label asp-for="Description">توضیحات</label>
+                                                <textarea asp-for="Description" class="form-control" placeholder="Take a note here" rows="3"></textarea>
+                                                <span asp-validation-for="Description" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade col-sm-12" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                                    <div class="ag-theme-alpine-dark col-sm-12 p-0" id="myGrid" style="height: 40vh;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary mt-2" type="submit">ذخیره</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @if (TempData["Response"] != null && (Response)TempData["Response"] == Response.Failed)
+    {
+        <script type="text/javascript">
+            Swal.fire({
+                icon: 'error',
+                title: '@TempData["AlertMessage"]',
+                confirmButtonText: 'تایید',
+                timer: 3000
+            });
+        </script>
+
+        TempData.Remove("Response");
+        TempData.Remove("AlertMessage");
+    }
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            getPermissions();
+        });
+
+        function getPermissions() {
+            $.ajax({
+                type: "GET",
+                dataType: "json",
+                url: 'https://@Context.Request.Host/Admin/Role/GetPermissionList',
+                contentType: "application/json",
+                success: function (result) {
+                    //console.log(result);
+                    gridOptions.api.setRowData(result);
+                },
+                error: function (e) {
+                    console.log(e.responseText);
+                }
+            });
+        }
+
+        const columnDefs = [
+            {
+                headerName: 'ردیف',
+                field: "row",
+                width: 120,
+                checkboxSelection: true,
+                headerCheckboxSelection: true,
+                pinned: 'right'
+            },
+            {
+                headerName: 'محدوده',
+                field: 'areaName',
+                width: 200,
+                rowGroup: true,
+                enableRowGroup: true,
+                rowGroupIndex: 1,
+                hide: true
+            },
+            {
+                headerName: 'ماژول',
+                field: 'moduleName',
+                width: 200,
+                rowGroup: true,
+                enableRowGroup: true,
+                rowGroupIndex: 2,
+                hide: true
+            },
+            {
+                headerName: 'عملیات',
+                field: 'actionName',
+                width: 200
+            }
+        ];
+
+        const gridOptions = {
+            enableRangeSelection: true,
+            groupSelectsChildren: true,
+            rowGroupPanelShow: 'always',
+            rowSelection: 'multiple',
+            defaultColDef: {
+                resizable: true,
+                sortable: true,
+                filter: true
+            },
+            columnDefs: columnDefs,
+            enableRtl: true,
+            animateRows: true,
+            onSelectionChanged(event) {
+                let selectedIds = event.api.getSelectedRows().map(row => row.id);
+
+                // get the hidden input field by id
+                var permissionIdsInput = document.getElementById("PermissionIds");
+                // remove any existing input fields inside the permissionIdsInput
+                permissionIdsInput.innerHTML = "";
+                // loop through the selected rows and create a new input field for each permissionId
+                for (var i = 0; i < selectedIds.length; i++) {
+                    // create a new input element
+                    var input = document.createElement("input");
+                    // set the type to hidden
+                    input.type = "hidden";
+                    // set the name to permissionIds[]
+                    input.name = "PermissionIds";
+                    // set the value to the permissionId of the selected row
+                    var permissionIdNumber = parseInt(selectedIds[i]);
+
+                    input.value = permissionIdNumber;
+                    // append the input element to the permissionIdsInput
+                    permissionIdsInput.appendChild(input);
+                }
+            }
+        };
+        const eGridDiv = document.getElementById("myGrid");
+        new agGrid.Grid(eGridDiv, gridOptions);
+    </script>
+}
