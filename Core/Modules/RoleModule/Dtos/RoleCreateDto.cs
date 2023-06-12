@@ -14,7 +14,7 @@ public class RoleCreateDto
     [Display(Name = "توضیحات")]
     public string Description { get; set; }
 
-    public List<long> PermissionIds { get; set; }
+    public List<long> PermissionIds { get; set; } = new();
 }
 
 public class RoleCreateDtoProfile : Profile

@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Data.Models;
-public class Role : IHaveId , IHaveDateLog
+public class Role : IHaveId, IHaveDateLog, IHaveConcurrencyStamp
 {
     public long Id { get; set; }
 

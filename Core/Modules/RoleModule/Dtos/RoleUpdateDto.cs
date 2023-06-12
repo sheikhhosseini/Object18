@@ -14,6 +14,11 @@ public class RoleUpdateDtoProfile : Profile
 {
     public RoleUpdateDtoProfile()
     {
-        CreateMap<Role, RoleUpdateDto>(MemberList.Destination);
+        CreateMap<Role, RoleUpdateDto>(MemberList.Destination)
+            .ForMember(role => role.PermissionIds, opt =>
+                opt.MapFrom(role => role.RolePermissions.Select(x => x.PermissionId)))
+            .ReverseMap()
+            .ForMember(model => model.ConcurrencyStamp, opt => opt.Ignore())
+            .ForMember(model => model.RolePermissions, opt => opt.Ignore());
     }
 }

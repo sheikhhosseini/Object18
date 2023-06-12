@@ -29,19 +29,40 @@
             <div class="col-sm-12">
                 <form method="post" asp-area="Admin" asp-controller="Role" asp-action="Edit" enctype="multipart/form-data">
                     <div class="row">
-                        <input type="hidden" asp-for="Id" />
-                        <input type="hidden" asp-for="ConcurrencyStamp" />
-                        <div class="col-md-4">
-                            <label asp-for="Name">نام</label>
-                            <input asp-for="Name" class="form-control">
-                            <span asp-validation-for="Name" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <label asp-for="Description">توضیحات</label>
-                            <textarea asp-for="Description" class="form-control" placeholder="Take a note here" rows="3"></textarea>
-                            <span asp-validation-for="Description" class="text-danger"></span>
+                        <input type="hidden" id="PermissionIds" multiple />
+                        <div class="card-body col-sm-12">
+                            <ul class="nav nav-tabs mb-3" id="myTab" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">اطلاعات</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">مجوز ها</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content col-sm-12" id="myTabContent">
+                                <div class="tab-pane fade show active col-sm-12" id="home" role="tabpanel" aria-labelledby="home-tab">
+                                    <div class="col-sm-12">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label asp-for="Name">نام</label>
+                                                <input asp-for="Name" class="form-control">
+                                                <span asp-validation-for="Name" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-2">
+                                            <div class="col-md-6">
+                                                <label asp-for="Description">توضیحات</label>
+                                                <textarea asp-for="Description" class="form-control" placeholder="Take a note here" rows="3"></textarea>
+                                                <span asp-validation-for="Description" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade col-sm-12" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                                    <input id="searchGrid" class="form-control" placeholder="جستجو..." type="text">
+                                    <div class="ag-theme-alpine-dark col-sm-12 p-0" id="myGrid" style="height: 40vh;"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <button class="btn btn-primary mt-2" type="submit">ذخیره</button>
@@ -66,23 +87,119 @@
         TempData.Remove("Response");
         TempData.Remove("AlertMessage");
     }
-    
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $("#DateOfBirth").persianDatepicker({
-                cellWidth: 58,
-                cellHeight: 40,
-                fontSize: 18,
-                formatDate: "YYYY/0M/0D"
-            });
+            getPermissions();
 
-            $("#RegisterDate").persianDatepicker({
-                cellWidth: 58,
-                cellHeight: 40,
-                fontSize: 18,
-                formatDate: "YYYY/0M/0D"
+            var searchInput = $("#searchGrid");
+
+            searchInput.keyup(function() {
+                // Get the input value
+                var value = searchInput.val();
+                // Apply a quick filter to the grid based on the value
+                gridOptions.api.setQuickFilter(value);
             });
         });
+
+        function getPermissions() {
+            $.ajax({
+                type: "GET",
+                dataType: "json",
+                url: 'https://@Context.Request.Host/Admin/Role/GetPermissionList',
+                contentType: "application/json",
+                success: function (result) {
+                    gridOptions.api.setRowData(result);
+                    setSelectedNodes();
+                },
+                error: function (e) {
+                    console.log(e.responseText);
+                }
+            });
+        }
+
+        function setSelectedNodes() {
+            var modelData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.PermissionIds));
+
+            gridOptions.api.forEachNode(node => {
+                if (!node.group && modelData.find(permissionId => permissionId === node.data.id)) {
+                    node.setSelected(true);
+                }
+            });
+        }
+
+        const columnDefs = [
+            {
+                headerName: 'ردیف',
+                field: "row",
+                width: 120,
+                checkboxSelection: true,
+                headerCheckboxSelection: true,
+                pinned: 'right'
+            },
+            {
+                headerName: 'محدوده',
+                field: 'areaName',
+                width: 200,
+                rowGroup: true,
+                enableRowGroup: true,
+                rowGroupIndex: 1,
+                hide: true
+            },
+            {
+                headerName: 'ماژول',
+                field: 'moduleName',
+                width: 200,
+                rowGroup: true,
+                enableRowGroup: true,
+                rowGroupIndex: 2,
+                hide: true
+            },
+            {
+                headerName: 'عملیات',
+                field: 'actionName',
+                width: 200
+            }
+        ];
+
+        const gridOptions = {
+            enableRangeSelection: true,
+            groupSelectsChildren: true,
+            rowGroupPanelShow: 'always',
+            rowSelection: 'multiple',
+            defaultColDef: {
+                resizable: true,
+                sortable: true,
+                filter: true
+            },
+            columnDefs: columnDefs,
+            enableRtl: true,
+            animateRows: true,
+            onSelectionChanged(event) {
+                let selectedIds = event.api.getSelectedRows().map(row => row.id);
+
+                // get the hidden input field by id
+                var permissionIdsInput = document.getElementById("PermissionIds");
+                // remove any existing input fields inside the permissionIdsInput
+                permissionIdsInput.innerHTML = "";
+                // loop through the selected rows and create a new input field for each permissionId
+                for (var i = 0; i < selectedIds.length; i++) {
+                    // create a new input element
+                    var input = document.createElement("input");
+                    // set the type to hidden
+                    input.type = "hidden";
+                    // set the name to permissionIds[]
+                    input.name = "PermissionIds";
+                    // set the value to the permissionId of the selected row
+                    var permissionIdNumber = parseInt(selectedIds[i]);
+
+                    input.value = permissionIdNumber;
+                    // append the input element to the permissionIdsInput
+                    permissionIdsInput.appendChild(input);
+                }
+            }
+        };
+        const eGridDiv = document.getElementById("myGrid");
+        new agGrid.Grid(eGridDiv, gridOptions);
     </script>
 }

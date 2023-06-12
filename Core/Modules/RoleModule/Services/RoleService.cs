@@ -36,29 +36,17 @@ public class RoleService : IRoleService
 
     public async Task<OperationResult<RoleUpdateDto>> Create(RoleCreateDto createDto)
     {
-        //if (await IsKodMeliDuplicate(null, createDto.KodMeli))
-        //{
-        //    return new OperationResult<RoleUpdateDto>
-        //    {
-        //        Type = OperationResultType.Single,
-        //        Response = Response.Failed,
-        //        Message = "کد ملی تکراری است."
-        //    };
-        //}
-
-        //if (await IsMobileNumberDuplicate(null, createDto.MobileNumber))
-        //{
-        //    return new OperationResult<RoleUpdateDto>
-        //    {
-        //        Type = OperationResultType.Single,
-        //        Response = Response.Failed,
-        //        Message = "شماره تلفن تکراری است."
-        //    };
-        //}
+        if (await IsNameDuplicate(null, createDto.Name))
+        {
+            return new OperationResult<RoleUpdateDto>
+            {
+                Type = OperationResultType.Single,
+                Response = Response.Failed,
+                Message = "نام تکراری است."
+            };
+        }
 
         var newRole = _mapper.Map<Role>(createDto);
-        //string imageName = await FileSaver.CreateImage(createDto.ImageFile, nameof(Role));
-        //newRole.Image = imageName;
 
         await _dbContext.AddEntityAsync(newRole);
         await _dbContext.SaveChangesAsync();
@@ -73,27 +61,18 @@ public class RoleService : IRoleService
 
     public async Task<OperationResult<RoleUpdateDto>> Update(RoleUpdateDto updateDto)
     {
-        //if (await IsKodMeliDuplicate(updateDto.Id, updateDto.KodMeli))
-        //{
-        //    return new OperationResult<RoleUpdateDto>
-        //    {
-        //        Type = OperationResultType.Single,
-        //        Response = Response.Failed,
-        //        Message = "کد ملی تکراری است."
-        //    };
-        //}
-
-        //if (await IsMobileNumberDuplicate(updateDto.Id, updateDto.MobileNumber))
-        //{
-        //    return new OperationResult<RoleUpdateDto>
-        //    {
-        //        Type = OperationResultType.Single,
-        //        Response = Response.Failed,
-        //        Message = "شماره تلفن تکراری است."
-        //    };
-        //}
+        if (await IsNameDuplicate(updateDto.Id, updateDto.Name))
+        {
+            return new OperationResult<RoleUpdateDto>
+            {
+                Type = OperationResultType.Single,
+                Response = Response.Failed,
+                Message = "نام تکراری است."
+            };
+        }
 
         var existingRole = await _dbContext.Roles
+            .Include(role => role.RolePermissions)
             .Where(role => role.Id == updateDto.Id)
             .SingleOrDefaultAsync();
 
@@ -101,14 +80,21 @@ public class RoleService : IRoleService
 
         _mapper.Map(updateDto, existingRole);
 
-        //existingRole.Image = await FileSaver.UpdateImage(updateDto.ImageFile, existingRole.Image, nameof(Role));
+        var updatedPermissionList = updateDto.PermissionIds.Select(permissionId => new RolePermission
+        {
+            Id = existingRole.RolePermissions.SingleOrDefault(x => x.PermissionId == permissionId)?.Id ?? 0,
+            RoleId = existingRole.Id,
+            PermissionId = permissionId
+        }).ToList();
+
+        existingRole.RolePermissions = updatedPermissionList;
 
         _dbContext.UpdateEntity(existingRole);
 
-        //_dbContext.Entry(existingRole).Property(role => role.ConcurrencyStamp).OriginalValue =
-        //    updateDto.ConcurrencyStamp;
+        _dbContext.Entry(existingRole).Property(role => role.ConcurrencyStamp).OriginalValue =
+            updateDto.ConcurrencyStamp;
 
-        //existingRole.ConcurrencyStamp = Guid.NewGuid().ToString();
+        existingRole.ConcurrencyStamp = Guid.NewGuid().ToString();
 
         await _dbContext.SaveChangesAsync();
 
@@ -153,7 +139,7 @@ public class RoleService : IRoleService
                 deleteDto.ConcurrencyStamp;
         }
 
-        _dbContext.Remove(existingRoles);
+        _dbContext.RemoveRange(existingRoles);
 
         await _dbContext.SaveChangesAsync();
 
@@ -172,15 +158,9 @@ public class RoleService : IRoleService
             .ToListAsync();
     }
 
-    //public async Task<bool> IsKodMeliDuplicate(long? id, string kodMeli)
-    //{
-    //    return await _dbContext.GetAsNoTrackingQuery<Role>()
-    //        .AnyAsync(role => role.Id != id && role.KodMeli == kodMeli);
-    //}
-
-    //public async Task<bool> IsMobileNumberDuplicate(long? id, string mobileNumber)
-    //{
-    //    return await _dbContext.GetAsNoTrackingQuery<Role>()
-    //        .AnyAsync(role => role.Id != id && role.MobileNumber == mobileNumber);
-    //}
+    public async Task<bool> IsNameDuplicate(long? id, string name)
+    {
+        return await _dbContext.GetAsNoTrackingQuery<Role>()
+            .AnyAsync(role => role.Id != id && role.Name == name);
+    }
 }
