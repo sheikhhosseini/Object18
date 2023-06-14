@@ -32,6 +32,9 @@ public class RoleConfig : IEntityTypeConfiguration<Role>
         builder.Property(r => r.Description)
             .HasMaxLength(250);
 
+        builder.Property(e => e.ConcurrencyStamp)
+            .IsConcurrencyToken();
+
         // Indexes
         builder.HasIndex(e => e.Name)
             .IsUnique();
