@@ -17,4 +17,6 @@ public interface IRoleService
     Task<OperationResult<RoleUpdateDto>> Delete(List<RoleDeleteDto> deleteDtos);
 
     Task<List<PermissionSelectItemDto>> GetPermissionList();
+
+    Task<List<SelectItemDto>> GetSelectItemList();
 }

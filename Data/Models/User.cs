@@ -4,9 +4,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Data.Models;
 
-public class User : IHaveId, IHaveDateLog
+public class User : IHaveId, IHaveDateLog, IHaveConcurrencyStamp
 {
     public long Id { get; set; }
+
+    public string ConcurrencyStamp { get; set; } = Guid.NewGuid().ToString();
 
     public string CreateDate { get; set; }
 
@@ -65,8 +67,14 @@ public class UserConfig : IEntityTypeConfiguration<User>
         builder.Property(u => u.UserImage)
             .HasMaxLength(200);
 
+        builder.Property(e => e.ConcurrencyStamp)
+            .IsConcurrencyToken();
+
         // index
         builder.HasIndex(u=>u.Email)
+            .IsUnique();
+
+        builder.HasIndex(u => u.MobileNumber)
             .IsUnique();
     }
 }

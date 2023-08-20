@@ -112,4 +112,10 @@ public class RoleController : Controller
     {
         return new JsonResult(await _roleService.GetPermissionList());
     }
+
+    [HttpGet]
+    public async Task<ActionResult> GetSelectItemList()
+    {
+        return new JsonResult(await _roleService.GetSelectItemList());
+    }
 }

@@ -1,11 +1,12 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Core.Modules.UserModule.Dtos;
 using Core.Shared.Paging;
 using Core.Shared.Tools;
 using Data.Context;
 using Data.Models;
-using Gridify;
 using Microsoft.EntityFrameworkCore;
+using Core.Shared.DataTable;
 
 namespace Core.Modules.UserModule.Services;
 
@@ -13,50 +14,50 @@ public class UserService : IUserService
 {
     private readonly MainDbContext _dbContext;
     private readonly IMapper _mapper;
+    private readonly IDataTableService _dataTable;
 
-    public UserService(MainDbContext dbContext, IMapper mapper)
+    public UserService(
+        MainDbContext dbContext,
+        IMapper mapper,
+        IDataTableService dataTable
+    )
     {
         _dbContext = dbContext;
         _mapper = mapper;
+        _dataTable = dataTable;
     }
 
     public async Task<AdvanceDataTable<UserDataTableDto>> GetDataTable(
-        AdvanceDataTable<UserDataTableDto> data
+        AdvanceDataTable<UserDataTableDto> dataTableRequest
     )
     {
-        var query = _dbContext.GetAsNoTrackingQuery<User>();
-
-        foreach (var filter in data.Filters)
-        {
-            if (filter.KeyType == "text")
-            {
-                query = query.ApplyFiltering($"{filter.KeyName} {filter.KeyOperator} {filter.KeyValue.First()}");
-            }
-            else if (filter.KeyType == "number")
-            {
-                query = query.ApplyFiltering($"{filter.KeyName} {filter.KeyOperator} {filter.KeyValue.First()}");
-            }
-            else if (filter.KeyType == "list")
-            {
-
-            }
-        }
-
-        foreach (var sortOrder in data.SortOrder)
-        {
-            if (!string.IsNullOrEmpty(sortOrder.KeyName) && !string.IsNullOrEmpty(sortOrder.KeySort))
-            {
-                query = query.ApplyOrdering($"{sortOrder.KeyName} {sortOrder.KeySort}");
-            }
-        }
-
-        return await GeneratePages(data, query);
+        return await _dataTable.GetDataTable(_dbContext.GetAsNoTrackingQuery<User>(), dataTableRequest);
     }
 
     public async Task<OperationResult<UserUpdateDto>> Create(UserCreateDto createDto)
     {
+        if (await IsEmailDuplicate(null, createDto.Email))
+        {
+            return new OperationResult<UserUpdateDto>
+            {
+                Type = OperationResultType.Single,
+                Response = Response.Failed,
+                Message = "کد ملی تکراری است."
+            };
+        }
+
+        if (await IsMobileNumberDuplicate(null, createDto.MobileNumber))
+        {
+            return new OperationResult<UserUpdateDto>
+            {
+                Type = OperationResultType.Single,
+                Response = Response.Failed,
+                Message = "شماره تلفن تکراری است."
+            };
+        }
+
         var newUser = _mapper.Map<User>(createDto);
-        string imageName = await FileSaver.CreateImage(createDto.UserImage, nameof(User));
+        string imageName = await FileSaver.CreateImage(createDto.ImageFile, nameof(User));
         newUser.UserImage = imageName;
 
         await _dbContext.AddEntityAsync(newUser);
@@ -64,53 +65,50 @@ public class UserService : IUserService
 
         return new OperationResult<UserUpdateDto>
         {
-            Message = "کاربر با موفقیت ایجاد شد",
+            Message = "کاربر جدید با موفقیت ایجاد شد.",
             Type = OperationResultType.Single,
             Response = Response.Success
         };
     }
 
-    public async Task<UserUpdateDto> Update(UserUpdateDto updateDto)
+    public async Task<OperationResult<UserUpdateDto>> Update(UserUpdateDto updateDto)
     {
+        if (await IsEmailDuplicate(updateDto.Id, updateDto.Email))
+        {
+            return new OperationResult<UserUpdateDto>
+            {
+                Type = OperationResultType.Single,
+                Response = Response.Failed,
+                Message = "ایمیل تکراری است."
+            };
+        }
+
+        if (await IsMobileNumberDuplicate(updateDto.Id, updateDto.MobileNumber))
+        {
+            return new OperationResult<UserUpdateDto>
+            {
+                Type = OperationResultType.Single,
+                Response = Response.Failed,
+                Message = "شماره تلفن تکراری است."
+            };
+        }
+
         var existingUser = await _dbContext.Users
-            .Where(u => u.Id == 1)
+            .Where(user => user.Id == updateDto.Id)
             .SingleOrDefaultAsync();
+
+        if (existingUser == null) return null;
 
         _mapper.Map(updateDto, existingUser);
 
+        existingUser.UserImage = await FileSaver.UpdateImage(updateDto.ImageFile, existingUser.UserImage, nameof(User));
+
         _dbContext.UpdateEntity(existingUser);
-        await _dbContext.SaveChangesAsync();
 
-        var x = new OperationResult<UserUpdateDto>
-        {
-            Type = OperationResultType.Single,
-            Response = Response.Success,
-            Message = "",
-            Record = new UserUpdateDto()
-        };
-        
-        return null;
-    }
+        _dbContext.Entry(existingUser).Property(user => user.ConcurrencyStamp).OriginalValue =
+            updateDto.ConcurrencyStamp;
 
-    public async Task<UserUpdateDto> Get(long id)
-    {
-        var existingUser = await _dbContext.Users
-            .Where(u => u.Id == id)
-            .SingleOrDefaultAsync();
-
-        return _mapper.Map<UserUpdateDto>(existingUser);
-    }
-
-    public async Task<OperationResult<UserUpdateDto>> Delete(List<long> deleteDtos)
-    {
-        var users = await _dbContext.Users
-            .Where(u => deleteDtos.Contains(u.Id))
-            .ToListAsync();
-
-        foreach (var user in users)
-        {
-            _dbContext.Remove(user);
-        }
+        existingUser.ConcurrencyStamp = Guid.NewGuid().ToString();
 
         await _dbContext.SaveChangesAsync();
 
@@ -118,40 +116,74 @@ public class UserService : IUserService
         {
             Type = OperationResultType.Single,
             Response = Response.Success,
-            Message = $"'{users.Count}' کاربر با موفقیت حذف شد",
+            Message = "کاربر با موفقیت ویرایش شد."
         };
     }
 
-    private async Task<AdvanceDataTable<UserDataTableDto>> GeneratePages(
-        AdvanceDataTable<UserDataTableDto> data,
-        IQueryable<User> query
-    )
+    public async Task<UserUpdateDto> Get(long id)
     {
+        return await _dbContext.Users
+            .Where(user => user.Id == id)
+            .ProjectTo<UserUpdateDto>(_mapper.ConfigurationProvider)
+            .SingleOrDefaultAsync();
+    }
 
-        var pageCount = (int)Math.Ceiling(query.Count() / (double)data.TakeEntity);
-        var pager = PageGenerator.Generate(pageCount, data.PageId, data.TakeEntity);
-        var users = await query.Paging(pager).ToListAsync();
+    public async Task<OperationResult<UserUpdateDto>> Delete(List<UserDeleteDto> deleteDtos)
+    {
+        if (deleteDtos is null)
+            throw new ArgumentNullException(nameof(deleteDtos), "deleteDtos cannot be null.");
 
-        var records = _mapper.Map<List<UserDataTableDto>>(users);
+        var userIds = deleteDtos.Select(x => x.Id).ToArray();
 
-        var rowNumber = pager.SkipEntity;
-        foreach (var record in records)
+        var existingUsers = await _dbContext.Users
+            .Where(user => userIds.Contains(user.Id))
+            .ToListAsync();
+
+        foreach (var existingUser in existingUsers)
         {
-            record.Row = ++rowNumber;
+            var deleteDto =
+                deleteDtos.SingleOrDefault(userDeleteDto => userDeleteDto.Id == existingUser.Id);
+            if (deleteDto == null) continue;
+
+            if (string.IsNullOrWhiteSpace(deleteDto.ConcurrencyStamp))
+                throw new InvalidOperationException(
+                    $"{nameof(deleteDto.ConcurrencyStamp)} for {nameof(User)} with {deleteDto.Id} can not be null or empty."); ;
+
+            _dbContext.Entry(existingUser).Property(user => user.ConcurrencyStamp).OriginalValue =
+                deleteDto.ConcurrencyStamp;
         }
 
-        var result = new AdvanceDataTable<UserDataTableDto>
-        {
-            Records = records,
-            PageId = pager.PageId,
-            PageCount = pager.PageCount,
-            StartPage = pager.StartPage,
-            EndPage = pager.EndPage,
-            TakeEntity = pager.TakeEntity,
-            SkipEntity = pager.SkipEntity,
-            ActivePage = pager.ActivePage,
-        };
+        _dbContext.RemoveRange(existingUsers);
 
-        return result;
+        await _dbContext.SaveChangesAsync();
+
+        return new OperationResult<UserUpdateDto>
+        {
+            Type = OperationResultType.Single,
+            Response = Response.Success,
+            Message = $"'{existingUsers.Count}' کاربر با موفقیت حذف شد.",
+        };
+    }
+
+    public async Task<List<SelectItemDto>> SelectItems()
+    {
+        return await _dbContext.GetAsNoTrackingQuery<Mission>()
+            .Select(mission => new SelectItemDto
+            {
+                Id = mission.Id.ToString(),
+                Text = mission.Title
+            }).ToListAsync();
+    }
+
+    public async Task<bool> IsEmailDuplicate(long? id, string email)
+    {
+        return await _dbContext.GetAsNoTrackingQuery<User>()
+            .AnyAsync(user => user.Id != id && user.Email == email);
+    }
+
+    public async Task<bool> IsMobileNumberDuplicate(long? id, string mobileNumber)
+    {
+        return await _dbContext.GetAsNoTrackingQuery<User>()
+            .AnyAsync(user => user.Id != id && user.MobileNumber == mobileNumber);
     }
 }

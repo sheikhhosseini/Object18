@@ -210,14 +210,13 @@ function onKeyNameChange(input) {
 
         $('.js-example-basic-single').select2({
             ajax: {
-                headers: {
-                    RequestVerificationToken: $(".AntiForge" + " input").val()
-                },
-                type: "POST",
+                //headers: {
+                //    RequestVerificationToken: $(".AntiForge" + " input").val()
+                //},
+                type: "Get",
                 dataType: "json",
                 url: selectedFilterDataSourceUrl,
                 contentType: "application/json",
-                //data: JSON.stringify('ss'),
                 processResults: function (data) {
                     return {
                         results: data

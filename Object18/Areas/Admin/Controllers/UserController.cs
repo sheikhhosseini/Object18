@@ -3,7 +3,8 @@ using Core.Modules.UserModule.Services;
 using Core.Shared.Paging;
 using Core.Shared.Tools;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
+using Object18.Controllers;
+using Object18.PermissionChecker;
 
 namespace Object18.Areas.Admin.Controllers;
 
@@ -17,27 +18,92 @@ public class UserController : Controller
         _userService = userService;
     }
 
-    // GET: UserController
     public ActionResult Index()
     {
         return View();
     }
 
+    //[Permission(UserControllerPermissions.List)]
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<ActionResult> Test1(string data)
+    public async Task<ActionResult> GetDataTable([FromBody] AdvanceDataTable<UserDataTableDto> data)
+    {
+        return new JsonResult(await _userService.GetDataTable(data));
+    }
+
+    public ActionResult Create()
+    {
+        return View();
+    }
+
+    //[Permission(UserControllerPermissions.Create)]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(UserCreateDto createDto)
+    {
+        if (!ModelState.IsValid) return View(createDto);
+
+        var result = await _userService.Create(createDto);
+
+        TempData["Response"] = result.Response;
+        TempData["AlertMessage"] = result.Message;
+
+        if (result.Response == Core.Shared.Tools.Response.Success)
+        {
+            return RedirectToAction(nameof(Index));
+        }
+
+        return View(createDto);
+    }
+
+    public async Task<ActionResult> Edit(int id)
+    {
+        return View(await _userService.Get(id));
+    }
+
+    //[Permission(UserControllerPermissions.Update)]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(UserUpdateDto updateDto)
+    {
+        if (!ModelState.IsValid) return View(updateDto);
+
+        var result = await _userService.Update(updateDto);
+
+        TempData["Response"] = result.Response;
+        TempData["AlertMessage"] = result.Message;
+
+        if (result.Response == Core.Shared.Tools.Response.Success)
+        {
+            return RedirectToAction(nameof(Index));
+        }
+
+        return View(updateDto);
+    }
+
+    //[Permission(UserControllerPermissions.Delete)]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete([FromBody] List<UserDeleteDto> deleteDtos)
+    {
+        return Json(await _userService.Delete(deleteDtos));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public ActionResult GetGenderDataSource()
     {
         var result = new List<SelectItemDto>
         {
             new()
             {
-                Text = "1",
-                Id = "aaa"
+                Text = "مرد",
+                Id = "true"
             },
             new()
             {
-                Text = "1",
-                Id = "aaa"
+                Text = "زن",
+                Id = "false"
             }
         };
         return new JsonResult(result);
@@ -45,86 +111,9 @@ public class UserController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<ActionResult> GridAjax([FromBody] AdvanceDataTable<UserDataTableDto> data)
+    public async Task<ActionResult> GetMissionDataSource()
     {
-        var result = await _userService.GetDataTable(data);
+        var result = await _userService.SelectItems();
         return new JsonResult(result);
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Delete([FromBody] List<long> ids)
-    {
-        return Json(await _userService.Delete(ids));
-    }
-
-
-
-
-
-
-
-
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(UserCreateDto input)
-    {
-        if (ModelState.IsValid)
-        {
-            //long uId = await _userAdminPanelService.AddUserFromAdmin(data);
-            //await _roleService.AddRolesForUser(data.PostSelectedRoles, uId);
-            //TempData["alert"] = "insertUserInfoDone";
-            return RedirectToAction(nameof(Index));
-        }
-
-        var a = ModelState.ErrorCount;
-
-        return View(input);
-    }
-
-
-
-
-    // GET: UserController/Create
-    public ActionResult Create()
-    {
-        return View();
-    }
-
-    // POST: UserController/Create
-    //[HttpPost]
-    //[ValidateAntiForgeryToken]
-    //public ActionResult Create(IFormCollection collection)
-    //{
-    //    try
-    //    {
-    //        return RedirectToAction(nameof(Index));
-    //    }
-    //    catch
-    //    {
-    //        return View();
-    //    }
-    //}
-
-    // GET: UserController/Edit/5
-    public ActionResult Edit(int id)
-    {
-        return View();
-    }
-
-    // POST: UserController/Edit/5
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public ActionResult Edit(int id, IFormCollection collection)
-    {
-        try
-        {
-            return RedirectToAction(nameof(Index));
-        }
-        catch
-        {
-            return View();
-        }
     }
 }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Core.Modules.UserModule.Dtos;
 using Core.Modules.UserModule.Services;
+using Core.Shared.DataTable;
 using Core.Shared.Tools;
 using Data.Context;
 using Data.Models;
@@ -26,7 +27,7 @@ public class UserTests : DbContextFixture
 
     private IUserService CreateService(MainDbContext context)
     {
-        return new UserService(context, _mapper);
+        return new UserService(context, _mapper, new DataTableService(_mapper));
     }
 
     /// <summary>
@@ -43,12 +44,12 @@ public class UserTests : DbContextFixture
         {
             FirstName = RandomFactory.FirstName(),
             LastName = RandomFactory.LastName(),
-            Password = RandomFactory.Text(6),
+            //Password = RandomFactory.Text(6),
             Email = RandomFactory.Email(),
-            ActiveCode = RandomFactory.Text(10),
-            UserImage = null,
+            //ActiveCode = RandomFactory.Text(10),
+            //UserImage = null,
             MobileNumber = "09131111111",
-            UserRoles = null
+            //UserRoles = null
         };
 
         // Act

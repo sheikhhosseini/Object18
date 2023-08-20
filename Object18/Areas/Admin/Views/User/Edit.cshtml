@@ -1,10 +1,10 @@
 ﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
 @using Core.Shared.Tools
-@model Core.Modules.UserModule.Dtos.UserCreateDto
+@model Core.Modules.UserModule.Dtos.UserUpdateDto
 
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Edit";
 }
 
 <div class="page-heading">
@@ -27,8 +27,11 @@
         </div>
         <div class="card-body">
             <div class="col-sm-12">
-                <form method="post" asp-area="Admin" asp-controller="User" asp-action="Create" enctype="multipart/form-data">
+                <form method="post" asp-area="Admin" asp-controller="User" asp-action="Edit" enctype="multipart/form-data">
                     <div class="row">
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="ConcurrencyStamp" />
+
                         <div class="col-md-4">
                             <label asp-for="FirstName">نام</label>
                             <input asp-for="FirstName" class="form-control">
@@ -73,7 +76,7 @@
                             <div class="form-row pt-1">
                                 <div class="col-md-6">
                                     <div class="custom-control custom-radio">
-                                        <input type="radio" class="custom-control-input" asp-for="Gender" id="man" value="true" required="true" checked>
+                                        <input type="radio" class="custom-control-input" asp-for="Gender" id="man" value="true" required="true">
                                         <label for="man" class="custom-control-label">مرد</label>
                                     </div>
                                 </div>
@@ -91,6 +94,9 @@
                             <label asp-for="ImageFile" class="form-label">تصویر</label>
                             <input asp-for="ImageFile" class="form-control" />
                             <span asp-validation-for="ImageFile" class="text-danger"></span>
+                        </div>
+                        <div class="avatar avatar-xl">
+                            <img src="@FilePathHelper.ImagePath(Model.Image)" alt="..." class="avatar-img rounded-circle">
                         </div>
                     </div>
                     <div class="row">
@@ -122,6 +128,7 @@
         TempData.Remove("Response");
         TempData.Remove("AlertMessage");
     }
+    
 
     <script type="text/javascript">
         $(document).ready(function () {

@@ -158,7 +158,18 @@ public class RoleService : IRoleService
             .ToListAsync();
     }
 
-    public async Task<bool> IsNameDuplicate(long? id, string name)
+    public async Task<List<SelectItemDto>> GetSelectItemList()
+    {
+        return await _dbContext.GetAsNoTrackingQuery<Role>()
+            .Select(mission => new SelectItemDto
+            {
+                Id = mission.Id.ToString(),
+                Text = mission.Name
+            })
+            .ToListAsync();
+    }
+
+    private async Task<bool> IsNameDuplicate(long? id, string name)
     {
         return await _dbContext.GetAsNoTrackingQuery<Role>()
             .AnyAsync(role => role.Id != id && role.Name == name);

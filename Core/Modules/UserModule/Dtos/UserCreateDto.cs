@@ -1,8 +1,8 @@
-﻿using AutoMapper;
+﻿using System.ComponentModel.DataAnnotations;
+using AutoMapper;
 using Core.Shared.Tools;
 using Data.Models;
 using Microsoft.AspNetCore.Http;
-using System.ComponentModel.DataAnnotations;
 
 namespace Core.Modules.UserModule.Dtos;
 
@@ -23,24 +23,35 @@ public class UserCreateDto
     [Required(ErrorMessage = "لطفا {0} را وارد کنید")]
     public string MobileNumber { get; set; }
 
-    [Display(Name = "ایمیل")]
+    [Display(Name = "کد ملی")]
+    [MaxLength(10, ErrorMessage = "تعداد کاراکتر های {0} نمیتواند بیشتر از {1} باشد")]
     [Required(ErrorMessage = "لطفا {0} را وارد کنید")]
+    public string KodMeli { get; set; }
+
+    [Display(Name = "تاریخ تولد")]
+    [MaxLength(10, ErrorMessage = "تعداد کاراکتر های {0} نمیتواند بیشتر از {1} باشد")]
+    [Required(ErrorMessage = "لطفا {0} را وارد کنید")]
+    public string DateOfBirth { get; set; }
+
+    [Display(Name = "تاریخ ثبت نام")]
+    [MaxLength(10, ErrorMessage = "تعداد کاراکتر های {0} نمیتواند بیشتر از {1} باشد")]
+    [Required(ErrorMessage = "لطفا {0} را وارد کنید")]
+    public string RegisterDate { get; set; }
+
+    [Display(Name = "ایمیل")]
     [MaxLength(100, ErrorMessage = "تعداد کاراکتر های {0} نمیتواند بیشتر از {1} باشد")]
     [EmailAddress(ErrorMessage = "لطفا {0} معتبر وارد کنید")]
     public string Email { get; set; }
 
-    [Display(Name = "رمز عبور")]
+    [Display(Name = "جنسیت")]
     [Required(ErrorMessage = "لطفا {0} را وارد کنید")]
-    [MaxLength(20, ErrorMessage = "تعداد کاراکتر های {0} نمیتواند بیشتر از {1} باشد")]
-    public string Password { get; set; }
+    public bool Gender { get; set; }
 
-    public string ActiveCode { get; set; }
+    [Display(Name = "آدرس")]
+    [MaxLength(400, ErrorMessage = "تعداد کاراکتر های {0} نمیتواند بیشتر از {1} باشد")]
+    public string Address { get; set; }
 
-    public bool IsActive { get; set; }
-
-    public IFormFile UserImage { get; set; }
-
-    public ICollection<UserRoleDto> UserRoles { get; set; }
+    public IFormFile ImageFile { get; set; }
 }
 
 public class UserCreateDtoProfile : Profile
@@ -55,8 +66,6 @@ public class UserCreateDtoProfile : Profile
             .ForMember(model => model.LastName, opt =>
                 opt.MapFrom(dto => dto.LastName.SanitizeText()))
             .ForMember(model => model.Email, opt =>
-                opt.MapFrom(dto => dto.Email.SanitizeText()))
-            .ForMember(model => model.Password, opt =>
-                opt.MapFrom(dto => dto.Password.EncodePasswordMd5()));
+                opt.MapFrom(dto => dto.Email.SanitizeText()));
     }
 }
